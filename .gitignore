@@ -68,4 +68,7 @@ outputs/
 models/
 *.xlsx
 *.csv
+# But include dataset files in data folder
 !data/
+!data/*.xlsx
+!data/*.csv
