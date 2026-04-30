@@ -257,7 +257,7 @@ This is a student project submitted for coursework. Feel free to use for educati
 
 - Guided by: **MS. ISHU CHAUDHARY**
 - Section: **1CSE26**
-- Institution: **[Your College Name]**
+- Institution: **IILM University Greater Noida**
 
 ---
 
