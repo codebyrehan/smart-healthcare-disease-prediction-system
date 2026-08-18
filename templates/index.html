@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Smart Healthcare Data Science diabetes prediction platform">
+  <title>Smart Healthcare | Disease Prediction</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">DATA SCIENCE · EXPLAINABLE ML</p>
+        <h1>Smart Healthcare</h1>
+        <p class="subtitle">Diabetes prediction powered by a reproducible machine-learning pipeline.</p>
+      </div>
+      <span class="badge">PIMA Dataset</span>
+    </header>
+
+    <section class="grid">
+      <form id="prediction-form" class="card">
+        <div class="card-heading">
+          <h2>Prediction workspace</h2>
+          <p>Enter patient parameters within the validated ranges.</p>
+        </div>
+        <div id="fields" class="form-grid"></div>
+        <button type="submit" id="predict-button">Analyze prediction</button>
+        <p id="form-error" class="error" role="alert"></p>
+      </form>
+
+      <section class="card result-card" aria-live="polite">
+        <div class="card-heading"><h2>Model result</h2><p>Educational prediction, not medical diagnosis.</p></div>
+        <div id="result" class="result empty">Complete the form to generate a prediction.</div>
+        <div class="notice">This project demonstrates Data Science and Machine Learning using the PIMA Indians Diabetes Dataset. Consult a qualified healthcare professional for medical decisions.</div>
+      </section>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
