@@ -9,6 +9,7 @@ from flask import Flask, jsonify, render_template, request
 from src.benchmark import load_benchmark
 from src.data_pipeline import FEATURES, clean_features, data_quality_report, load_dataset
 from src.data_quality import quality_summary
+from src.experiment_registry import load_experiments
 from src.explainability import global_feature_importance
 from src.prediction import predict
 from src.sensitivity import sensitivity_analysis
@@ -54,6 +55,28 @@ def benchmark():
         return jsonify({"error": str(exc)}), 503
     except (OSError, ValueError):
         return jsonify({"error": "Benchmark artifacts could not be read safely."}), 500
+
+
+@app.get("/api/experiments")
+def experiments():
+    try:
+        records = load_experiments()
+        # Registry is presentation metadata only; never expose secrets or raw artifacts.
+        public = [
+            {
+                "experiment_id": item.get("experiment_id"),
+                "timestamp_utc": item.get("timestamp_utc"),
+                "model_name": item.get("model_name"),
+                "dataset_version": item.get("dataset_version"),
+                "feature_count": len(item.get("feature_names", [])),
+                "metrics": item.get("metrics", {}),
+                "random_state": item.get("random_state"),
+            }
+            for item in records
+        ]
+        return jsonify({"experiments": public})
+    except ValueError:
+        return jsonify({"error": "Experiment registry is unavailable or invalid."}), 503
 
 
 @app.get("/api/explainability")
