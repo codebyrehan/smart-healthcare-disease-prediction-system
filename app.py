@@ -11,6 +11,7 @@ from src.data_pipeline import FEATURES, clean_features, data_quality_report, loa
 from src.data_quality import quality_summary
 from src.explainability import global_feature_importance
 from src.prediction import predict
+from src.sensitivity import sensitivity_analysis
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024
@@ -63,6 +64,29 @@ def explainability():
     if not values:
         return jsonify({"error": "This model does not expose verified global feature importance."}), 503
     return jsonify({"model": MODEL.__class__.__name__, "importance": values})
+
+
+@app.post("/api/sensitivity")
+def sensitivity():
+    if MODEL is None:
+        return jsonify({"error": "Prediction model is unavailable."}), 503
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "Request body must be a JSON object."}), 400
+    feature = payload.get("feature")
+    baseline = payload.get("baseline")
+    values = payload.get("values")
+    if not isinstance(feature, str) or not isinstance(baseline, dict) or not isinstance(values, list):
+        return jsonify({"error": "feature, baseline, and values are required."}), 400
+    if len(values) > 25:
+        return jsonify({"error": "A maximum of 25 what-if values is allowed."}), 400
+    try:
+        clean_baseline = {name: float(baseline[name]) for name in FEATURES}
+        clean_values = [float(value) for value in values]
+        result = sensitivity_analysis(MODEL, clean_baseline, feature, clean_values)
+        return jsonify({"feature": feature, "results": result, "disclaimer": "Sensitivity analysis describes model behavior; it does not establish causation or provide medical advice."})
+    except (KeyError, TypeError, ValueError, OverflowError) as exc:
+        return jsonify({"error": str(exc)}), 400
 
 
 @app.post("/api/predict")
