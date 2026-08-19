@@ -15,6 +15,11 @@ features.forEach(([name, min, max, step]) => {
   fields.appendChild(wrapper);
 });
 
+window.getPredictionBaseline = function () {
+  const payload = Object.fromEntries(new FormData(form).entries());
+  return Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, Number(value)]));
+};
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   error.textContent = "";
@@ -23,8 +28,7 @@ form.addEventListener("submit", async (event) => {
   result.className = "result loading";
   result.textContent = "Validating inputs and evaluating the model…";
 
-  const payload = Object.fromEntries(new FormData(form).entries());
-  Object.keys(payload).forEach((key) => { payload[key] = Number(payload[key]); });
+  const payload = window.getPredictionBaseline();
 
   try {
     const response = await fetch("/api/predict", {
@@ -36,6 +40,7 @@ form.addEventListener("submit", async (event) => {
     if (!response.ok) throw new Error(data.error || "Prediction request failed.");
     result.className = `result ${data.prediction ? "higher" : "lower"}`;
     result.innerHTML = `<strong>${data.label}</strong><span>Model probability: ${(data.probability * 100).toFixed(1)}%</span><small>Classification threshold: ${(data.threshold * 100).toFixed(0)}%</small>`;
+    window.dispatchEvent(new CustomEvent("prediction-ready", { detail: payload }));
   } catch (err) {
     result.className = "result empty";
     result.textContent = "Unable to generate a prediction.";
