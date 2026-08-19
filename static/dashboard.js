@@ -8,6 +8,7 @@ async function loadDashboard() {
     const quality = data.quality_summary || {};
     status.textContent = `${quality.rows?.toLocaleString?.() || 0} validated records · ${quality.features || data.features?.length || 0} predictive features`;
     renderQuality(data.quality, quality);
+    populateSensitivityFeatures(data.features || []);
   } catch (error) {
     status.textContent = 'Analytics are unavailable until the verified dataset is loaded.';
   }
@@ -15,9 +16,15 @@ async function loadDashboard() {
 
 function renderQuality(quality, summary) {
   const target = document.getElementById('target-stats');
-  if (!target) return;
-  const counts = quality?.class_counts || {};
-  target.innerHTML = `<div><strong>${counts['0'] || 0}</strong><span>Outcome 0</span></div><div><strong>${counts['1'] || 0}</strong><span>Outcome 1</span></div><div><strong>${summary?.missing_values ?? '—'}</strong><span>Missing values</span></div><div><strong>${summary?.duplicate_rows ?? '—'}</strong><span>Duplicate rows</span></div>`;
+  const details = document.getElementById('quality-details');
+  if (target) {
+    const counts = quality?.class_counts || {};
+    target.innerHTML = `<div><strong>${counts['0'] || 0}</strong><span>Outcome 0</span></div><div><strong>${counts['1'] || 0}</strong><span>Outcome 1</span></div><div><strong>${summary?.missing_values ?? '—'}</strong><span>Missing values</span></div><div><strong>${summary?.duplicate_rows ?? '—'}</strong><span>Duplicate rows</span></div>`;
+  }
+  if (details) {
+    const ratio = Number(summary?.finite_value_ratio);
+    details.innerHTML = `<div><strong>${summary?.rows ?? '—'}</strong><span>Validated rows</span></div><div><strong>${Number.isFinite(ratio) ? `${(ratio * 100).toFixed(1)}%` : '—'}</strong><span>Finite numeric values</span></div>`;
+  }
 }
 
 async function loadBenchmark() {
@@ -56,6 +63,50 @@ async function loadExplainability() {
   }
 }
 
+let baselineFeatures = null;
+function populateSensitivityFeatures(features) {
+  const select = document.getElementById('sensitivity-feature');
+  if (!select) return;
+  select.innerHTML = features.map((feature) => `<option value="${escapeHtml(feature)}">${escapeHtml(feature)}</option>`).join('');
+}
+
+function getBaselineFromForm() {
+  const fields = document.querySelectorAll('#fields input, #fields select');
+  const baseline = {};
+  fields.forEach((field) => { if (field.name) baseline[field.name] = Number(field.value); });
+  return baseline;
+}
+
+async function runSensitivity() {
+  const statusEl = document.getElementById('sensitivity-status');
+  const resultsEl = document.getElementById('sensitivity-results');
+  const feature = document.getElementById('sensitivity-feature')?.value;
+  const start = Number(document.getElementById('sensitivity-start')?.value);
+  const end = Number(document.getElementById('sensitivity-end')?.value);
+  const steps = Number(document.getElementById('sensitivity-steps')?.value);
+  if (!feature || !Number.isFinite(start) || !Number.isFinite(end) || !Number.isInteger(steps) || steps < 2 || steps > 25) {
+    statusEl.textContent = 'Enter valid start, end, and step values.';
+    return;
+  }
+  const baseline = baselineFeatures || getBaselineFromForm();
+  if (Object.keys(baseline).length !== 8 || Object.values(baseline).some((value) => !Number.isFinite(value))) {
+    statusEl.textContent = 'Complete a valid prediction form before running sensitivity analysis.';
+    return;
+  }
+  const values = Array.from({length: steps}, (_, index) => start + ((end - start) * index / (steps - 1)));
+  statusEl.textContent = 'Running verified model sensitivity…';
+  try {
+    const response = await fetch('/api/sensitivity', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({feature, baseline, values})});
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Sensitivity analysis unavailable');
+    resultsEl.innerHTML = data.results.map((row) => `<div class="sensitivity-row"><span>${Number(row.value).toFixed(2)}</span><div class="bar"><i style="width:${Math.min(100, Math.max(0, Number(row.probability) * 100))}%"></i></div><strong>${(Number(row.probability) * 100).toFixed(1)}%</strong></div>`).join('');
+    statusEl.textContent = `Sensitivity results for ${escapeHtml(data.feature)}. Model behavior only; not causal or clinical advice.`;
+  } catch (error) {
+    resultsEl.textContent = '';
+    statusEl.textContent = error.message || 'Sensitivity analysis unavailable.';
+  }
+}
+
 function fmt(value) {
   return Number.isFinite(Number(value)) ? Number(value).toFixed(3) : '—';
 }
@@ -64,6 +115,8 @@ function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
 
+window.setPredictionBaseline = (features) => { baselineFeatures = {...features}; };
+document.getElementById('run-sensitivity')?.addEventListener('click', runSensitivity);
 loadDashboard();
 loadBenchmark();
 loadExplainability();
