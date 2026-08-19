@@ -6,8 +6,9 @@ from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request
 
+from src.benchmark import load_benchmark
 from src.data_pipeline import FEATURES, clean_features, data_quality_report, load_dataset
-from src.prediction import predict, validate_patient_input
+from src.prediction import predict
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024
@@ -21,7 +22,7 @@ try:
     import joblib
     if MODEL_PATH.exists():
         MODEL = joblib.load(MODEL_PATH)
-except Exception as exc:  # keep the API healthy and expose a safe status instead of a traceback
+except Exception as exc:
     LOAD_ERROR = str(exc)
 
 try:
@@ -32,7 +33,11 @@ except Exception as exc:
 
 @app.get("/api/health")
 def health():
-    return jsonify({"status": "ok", "model_loaded": MODEL is not None, "dataset_loaded": DATASET is not None})
+    return jsonify({
+        "status": "ok",
+        "model_loaded": MODEL is not None,
+        "dataset_loaded": DATASET is not None,
+    })
 
 
 @app.get("/api/metadata")
@@ -40,6 +45,16 @@ def metadata():
     if DATASET is None:
         return jsonify({"error": "Dataset is unavailable."}), 503
     return jsonify({"features": FEATURES, "quality": data_quality_report(DATASET)})
+
+
+@app.get("/api/benchmark")
+def benchmark():
+    try:
+        return jsonify(load_benchmark())
+    except FileNotFoundError as exc:
+        return jsonify({"error": str(exc)}), 503
+    except (OSError, ValueError) as exc:
+        return jsonify({"error": "Benchmark artifacts could not be read safely."}), 500
 
 
 @app.post("/api/predict")
