@@ -8,6 +8,8 @@ from flask import Flask, jsonify, render_template, request
 
 from src.benchmark import load_benchmark
 from src.data_pipeline import FEATURES, clean_features, data_quality_report, load_dataset
+from src.data_quality import quality_summary
+from src.explainability import global_feature_importance
 from src.prediction import predict
 
 app = Flask(__name__)
@@ -33,18 +35,14 @@ except Exception as exc:
 
 @app.get("/api/health")
 def health():
-    return jsonify({
-        "status": "ok",
-        "model_loaded": MODEL is not None,
-        "dataset_loaded": DATASET is not None,
-    })
+    return jsonify({"status": "ok", "model_loaded": MODEL is not None, "dataset_loaded": DATASET is not None})
 
 
 @app.get("/api/metadata")
 def metadata():
     if DATASET is None:
         return jsonify({"error": "Dataset is unavailable."}), 503
-    return jsonify({"features": FEATURES, "quality": data_quality_report(DATASET)})
+    return jsonify({"features": FEATURES, "quality": data_quality_report(DATASET), "quality_summary": quality_summary(DATASET)})
 
 
 @app.get("/api/benchmark")
@@ -53,8 +51,18 @@ def benchmark():
         return jsonify(load_benchmark())
     except FileNotFoundError as exc:
         return jsonify({"error": str(exc)}), 503
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError):
         return jsonify({"error": "Benchmark artifacts could not be read safely."}), 500
+
+
+@app.get("/api/explainability")
+def explainability():
+    if MODEL is None:
+        return jsonify({"error": "Prediction model is unavailable."}), 503
+    values = global_feature_importance(MODEL, FEATURES)
+    if not values:
+        return jsonify({"error": "This model does not expose verified global feature importance."}), 503
+    return jsonify({"model": MODEL.__class__.__name__, "importance": values})
 
 
 @app.post("/api/predict")
