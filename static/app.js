@@ -41,6 +41,7 @@ form.addEventListener("submit", async (event) => {
     result.className = `result ${data.prediction ? "higher" : "lower"}`;
     result.innerHTML = `<strong>${data.label}</strong><span>Model probability: ${(data.probability * 100).toFixed(1)}%</span><small>Classification threshold: ${(data.threshold * 100).toFixed(0)}%</small>`;
     window.dispatchEvent(new CustomEvent("prediction-ready", { detail: payload }));
+    if (typeof window.setPredictionBaseline === "function") window.setPredictionBaseline(payload);
   } catch (err) {
     result.className = "result empty";
     result.textContent = "Unable to generate a prediction.";
