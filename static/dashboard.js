@@ -48,6 +48,28 @@ async function loadBenchmark() {
   }
 }
 
+async function loadExperiments() {
+  const statusEl = document.getElementById('experiment-status');
+  const table = document.getElementById('experiment-table');
+  if (!statusEl || !table) return;
+  try {
+    const response = await fetch('/api/experiments');
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Experiment history unavailable');
+    const records = Array.isArray(data.experiments) ? data.experiments : [];
+    statusEl.textContent = records.length ? `${records.length} reproducible experiment record${records.length === 1 ? '' : 's'}` : 'No experiment runs have been recorded yet.';
+    if (!records.length) {
+      table.innerHTML = '<div class="empty">Run the verified experiment pipeline to populate this lab.</div>';
+      return;
+    }
+    const headers = ['Experiment', 'Model', 'Dataset', 'Features', 'ROC-AUC', 'F1', 'Recorded (UTC)'];
+    table.innerHTML = `<div class="benchmark-row benchmark-head">${headers.map((h) => `<span>${escapeHtml(h)}</span>`).join('')}</div>` + records.slice().reverse().map((row) => `<div class="benchmark-row"><strong>${escapeHtml(row.experiment_id)}</strong><span>${escapeHtml(row.model_name)}</span><span>${escapeHtml(row.dataset_version)}</span><span>${escapeHtml(row.feature_count)}</span><span>${fmt(row.metrics?.roc_auc)}</span><span>${fmt(row.metrics?.f1)}</span><span>${escapeHtml(formatUtc(row.timestamp_utc))}</span></div>`).join('');
+  } catch (error) {
+    statusEl.textContent = 'Experiment registry is unavailable.';
+    table.innerHTML = '';
+  }
+}
+
 async function loadExplainability() {
   const statusEl = document.getElementById('explainability-status');
   const list = document.getElementById('importance-list');
@@ -111,6 +133,11 @@ function fmt(value) {
   return Number.isFinite(Number(value)) ? Number(value).toFixed(3) : '—';
 }
 
+function formatUtc(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toISOString().replace('T', ' ').replace('.000Z', ' UTC');
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
@@ -120,3 +147,4 @@ document.getElementById('run-sensitivity')?.addEventListener('click', runSensiti
 loadDashboard();
 loadBenchmark();
 loadExplainability();
+loadExperiments();
