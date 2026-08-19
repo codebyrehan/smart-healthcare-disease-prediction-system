@@ -34,9 +34,34 @@
     </section>
 
     <section class="card benchmark-card">
-      <div class="card-heading"><h2>Model Benchmark Center</h2><p>Compare the required algorithms using the reproducible training artifacts.</p></div>
+      <div class="card-heading"><h2>Model Benchmark Center</h2><p>Compare the required algorithms using verified training artifacts.</p></div>
       <div id="benchmark-status" class="muted">Loading benchmark…</div>
       <div id="benchmark-table" class="benchmark-table" role="region" aria-label="Model benchmark"></div>
+    </section>
+
+    <section class="advanced-grid">
+      <section class="card">
+        <div class="card-heading"><h2>Explainability Center</h2><p>Global model importance, shown only when supported by the loaded model.</p></div>
+        <div id="explainability-status" class="muted">Loading verified explainability…</div>
+        <div id="importance-list" class="importance-list" aria-live="polite"></div>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h2>Data Quality</h2><p>Transparent dataset quality checks from the validated source.</p></div>
+        <div id="quality-details" class="quality-details"><span>Waiting for dataset analytics…</span></div>
+      </section>
+    </section>
+
+    <section class="card sensitivity-card">
+      <div class="card-heading"><h2>Model Sensitivity Simulator</h2><p>Explore how changing one input changes the model output. This is sensitivity analysis, not a clinical recommendation.</p></div>
+      <div class="sensitivity-controls">
+        <label for="sensitivity-feature">Feature<select id="sensitivity-feature"></select></label>
+        <label for="sensitivity-start">Start<input id="sensitivity-start" type="number" step="any"></label>
+        <label for="sensitivity-end">End<input id="sensitivity-end" type="number" step="any"></label>
+        <label for="sensitivity-steps">Steps<input id="sensitivity-steps" type="number" min="2" max="25" value="6"></label>
+        <button type="button" id="run-sensitivity">Run sensitivity analysis</button>
+      </div>
+      <div id="sensitivity-status" class="muted" aria-live="polite">Enter a baseline prediction first.</div>
+      <div id="sensitivity-results" class="sensitivity-results"></div>
     </section>
   </main>
   <script src="/static/app.js"></script><script src="/static/dashboard.js"></script>
