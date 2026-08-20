@@ -1,4 +1,4 @@
-"""Model-agnostic and tree-based feature attribution helpers."""
+"""Model-agnostic and model-native feature attribution helpers."""
 from __future__ import annotations
 
 import numpy as np
@@ -16,7 +16,13 @@ def permutation_importance_table(model, X: pd.DataFrame, y: pd.Series, repeats: 
         model, X, y, scoring="roc_auc", n_repeats=repeats, random_state=42, n_jobs=-1
     )
     return (
-        pd.DataFrame({"feature": FEATURES, "importance_mean": result.importances_mean, "importance_std": result.importances_std})
+        pd.DataFrame(
+            {
+                "feature": FEATURES,
+                "importance_mean": result.importances_mean,
+                "importance_std": result.importances_std,
+            }
+        )
         .sort_values("importance_mean", ascending=False)
         .reset_index(drop=True)
     )
@@ -53,3 +59,16 @@ def model_native_importance(model) -> list[dict[str, float | str]]:
         {"feature": feature, "importance": float(value)}
         for feature, value in sorted(zip(FEATURES, normalized), key=lambda item: item[1], reverse=True)
     ]
+
+
+def global_feature_importance(model, feature_names: list[str] | tuple[str, ...] | None = None) -> list[dict[str, float | str]]:
+    """Backward-compatible API for verified global model-native importance.
+
+    The application endpoint uses this function only when a trained model is
+    available. It intentionally does not fabricate importance for estimators
+    that expose neither coefficients nor native tree importances.
+    """
+    names = list(feature_names or FEATURES)
+    if names != list(FEATURES):
+        raise ValueError("feature_names must match the validated project feature schema")
+    return model_native_importance(model)
