@@ -1,75 +1,25 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Smart Healthcare Data Science diabetes prediction platform">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Smart Healthcare Data Science diabetes prediction and analytics platform">
   <title>Smart Healthcare | Disease Prediction</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <main class="shell">
-    <header class="hero">
-      <div><p class="eyebrow">DATA SCIENCE · EXPLAINABLE ML</p><h1>Smart Healthcare</h1><p class="subtitle">A reproducible machine-learning workspace for diabetes risk analysis.</p></div>
-      <span class="badge">PIMA Dataset</span>
-    </header>
-
-    <section class="stats card">
-      <div><span>Dataset status</span><strong id="dashboard-status">Loading validated dataset…</strong></div>
-      <div id="target-stats" class="target-stats"></div>
-    </section>
-
-    <section class="grid">
-      <form id="prediction-form" class="card">
-        <div class="card-heading"><h2>Prediction workspace</h2><p>Enter patient parameters within the validated ranges.</p></div>
-        <div id="fields" class="form-grid"></div>
-        <button type="submit" id="predict-button">Analyze prediction</button>
-        <p id="form-error" class="error" role="alert"></p>
-      </form>
-      <section class="card result-card" aria-live="polite">
-        <div class="card-heading"><h2>Model result</h2><p>Educational prediction, not medical diagnosis.</p></div>
-        <div id="result" class="result empty">Complete the form to generate a prediction.</div>
-        <div class="notice">This project demonstrates Data Science and Machine Learning using the PIMA Indians Diabetes Dataset. Consult a qualified healthcare professional for medical decisions.</div>
-      </section>
-    </section>
-
-    <section class="card benchmark-card">
-      <div class="card-heading"><h2>Model Benchmark Center</h2><p>Compare the required algorithms using verified training artifacts.</p></div>
-      <div id="benchmark-status" class="muted">Loading benchmark…</div>
-      <div id="benchmark-table" class="benchmark-table" role="region" aria-label="Model benchmark"></div>
-    </section>
-
-    <section class="advanced-grid">
-      <section class="card">
-        <div class="card-heading"><h2>Explainability Center</h2><p>Global model importance, shown only when supported by the loaded model.</p></div>
-        <div id="explainability-status" class="muted">Loading verified explainability…</div>
-        <div id="importance-list" class="importance-list" aria-live="polite"></div>
-      </section>
-      <section class="card">
-        <div class="card-heading"><h2>Data Quality</h2><p>Transparent dataset quality checks from the validated source.</p></div>
-        <div id="quality-details" class="quality-details"><span>Waiting for dataset analytics…</span></div>
-      </section>
-    </section>
-
-    <section class="card sensitivity-card">
-      <div class="card-heading"><h2>Model Sensitivity Simulator</h2><p>Explore how changing one input changes the model output. This is sensitivity analysis, not a clinical recommendation.</p></div>
-      <div class="sensitivity-controls">
-        <label for="sensitivity-feature">Feature<select id="sensitivity-feature"></select></label>
-        <label for="sensitivity-start">Start<input id="sensitivity-start" type="number" step="any"></label>
-        <label for="sensitivity-end">End<input id="sensitivity-end" type="number" step="any"></label>
-        <label for="sensitivity-steps">Steps<input id="sensitivity-steps" type="number" min="2" max="25" value="6"></label>
-        <button type="button" id="run-sensitivity">Run sensitivity analysis</button>
-      </div>
-      <div id="sensitivity-status" class="muted" aria-live="polite">Enter a baseline prediction first.</div>
-      <div id="sensitivity-results" class="sensitivity-results"></div>
-    </section>
-
-    <section class="card experiment-card">
-      <div class="card-heading"><h2>Experiment Lab</h2><p>Reproducible records from the in-scope Logistic Regression, Decision Tree, and Random Forest experiments.</p></div>
-      <div id="experiment-status" class="muted">Loading experiment history…</div>
-      <div id="experiment-table" class="experiment-table" role="region" aria-label="Experiment history"></div>
-    </section>
-  </main>
-  <script src="/static/app.js"></script><script src="/static/dashboard.js"></script>
-</body>
-</html>
+<main class="shell">
+<header class="hero"><div><p class="eyebrow">DATA SCIENCE · EXPLAINABLE ML · RESPONSIBLE AI</p><h1>Smart Healthcare</h1><p class="subtitle">A reproducible machine-learning workspace for diabetes risk analysis.</p></div><span class="badge">PIMA Dataset</span></header>
+<section class="stats card"><div><span>Dataset status</span><strong id="dashboard-status">Loading validated dataset…</strong></div><div id="target-stats" class="target-stats"></div></section>
+<section class="grid">
+<form id="prediction-form" class="card"><div class="card-heading"><h2>Prediction workspace</h2><p>Enter patient parameters within validated ranges.</p></div><div id="fields" class="form-grid"></div><button type="submit" id="predict-button">Analyze prediction</button><p id="form-error" class="error" role="alert"></p></form>
+<section class="card result-card" aria-live="polite"><div class="card-heading"><h2>Model result</h2><p>Educational prediction, not medical diagnosis.</p></div><div id="result" class="result empty">Complete the form to generate a prediction.</div><div class="notice">Use this system for Data Science demonstration only. Consult a qualified healthcare professional for medical decisions.</div></section>
+</section>
+<section class="card benchmark-card"><div class="card-heading"><h2>Model Benchmark Center</h2><p>Compare Logistic Regression, Decision Tree and Random Forest using verified artifacts.</p></div><div id="benchmark-status" class="muted">Loading benchmark…</div><div id="benchmark-table" class="benchmark-table"></div></section>
+<section class="advanced-grid"><section class="card"><div class="card-heading"><h2>Explainability Center</h2><p>Global feature importance from the loaded model.</p></div><div id="explainability-status" class="muted">Loading verified explainability…</div><div id="importance-list" class="importance-list"></div></section><section class="card"><div class="card-heading"><h2>Data Quality</h2><p>Validated dataset integrity and coverage.</p></div><div id="quality-details" class="quality-details"><span>Waiting for dataset analytics…</span></div></section></section>
+<section class="card analytics-card"><div class="card-heading"><div><h2>EDA & Analytics Center</h2><p>Descriptive statistics, class balance, feature-outcome patterns and correlation analysis from the validated dataset.</p></div><a class="button-link" href="/api/report">Download analysis report</a></div><div id="eda-status" class="muted">Loading EDA…</div><div class="eda-grid"><div><h3>Outcome distribution</h3><div id="eda-outcomes" class="mini-table"></div></div><div><h3>Feature statistics</h3><div id="eda-statistics" class="mini-table"></div></div><div><h3>Feature ↔ outcome correlation</h3><div id="eda-correlation" class="mini-table"></div></div><div><h3>Mean feature values by outcome</h3><div id="eda-grouped" class="mini-table"></div></div></div></section>
+<section class="card sensitivity-card"><div class="card-heading"><h2>Model Sensitivity Simulator</h2><p>Explore model behavior when one input changes. Not causal or clinical advice.</p></div><div class="sensitivity-controls"><label for="sensitivity-feature">Feature<select id="sensitivity-feature"></select></label><label for="sensitivity-start">Start<input id="sensitivity-start" type="number" step="any"></label><label for="sensitivity-end">End<input id="sensitivity-end" type="number" step="any"></label><label for="sensitivity-steps">Steps<input id="sensitivity-steps" type="number" min="2" max="25" value="6"></label><button type="button" id="run-sensitivity">Run sensitivity analysis</button></div><div id="sensitivity-status" class="muted">Enter a baseline prediction first.</div><div id="sensitivity-results" class="sensitivity-results"></div></section>
+<section class="card experiment-card"><div class="card-heading"><h2>Experiment Lab</h2><p>Reproducible records for the in-scope ML experiments.</p></div><div id="experiment-status" class="muted">Loading experiment history…</div><div id="experiment-table" class="experiment-table"></div></section>
+<section class="card responsible"><div class="card-heading"><h2>Responsible AI & Limitations</h2><p>Transparent interpretation of this educational healthcare ML system.</p></div><ul><li>The PIMA dataset is historical and limited to the population represented by its source; generalization to other populations is not guaranteed.</li><li>A model probability is not a diagnosis, prognosis, treatment recommendation, or causal estimate.</li><li>Feature importance describes model behavior and must not be interpreted as medical causation.</li><li>Results depend on data quality, preprocessing, model version and evaluation design.</li></ul></section>
+<footer class="footer">Smart Healthcare · Data Science project · Mohd Rehan · 25SCS1003003208</footer>
+</main><script src="/static/app.js"></script><script src="/static/dashboard.js"></script>
+</body></html>
