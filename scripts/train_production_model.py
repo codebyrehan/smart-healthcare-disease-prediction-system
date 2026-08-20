@@ -18,6 +18,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+
+# Import project modules only after the repository root is guaranteed to be on sys.path.
 from src.data_pipeline import FEATURES, TARGET, clean_features, load_dataset
 
 MODEL_DIR = ROOT / "models"
