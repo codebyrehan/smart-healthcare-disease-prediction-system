@@ -1,150 +1,17 @@
 const status = document.getElementById('dashboard-status');
 
 async function loadDashboard() {
-  try {
-    const response = await fetch('/api/metadata');
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Analytics unavailable');
-    const quality = data.quality_summary || {};
-    status.textContent = `${quality.rows?.toLocaleString?.() || 0} validated records · ${quality.features || data.features?.length || 0} predictive features`;
-    renderQuality(data.quality, quality);
-    populateSensitivityFeatures(data.features || []);
-  } catch (error) {
-    status.textContent = 'Analytics are unavailable until the verified dataset is loaded.';
-  }
+  try { const response = await fetch('/api/metadata'); const data = await response.json(); if (!response.ok) throw new Error(data.error); const quality=data.quality_summary||{}; status.textContent=`${quality.rows?.toLocaleString?.()||0} validated records · ${quality.features||data.features?.length||0} predictive features`; renderQuality(data.quality,quality); populateSensitivityFeatures(data.features||[]); }
+  catch { status.textContent='Analytics are unavailable until the verified dataset is loaded.'; }
 }
-
-function renderQuality(quality, summary) {
-  const target = document.getElementById('target-stats');
-  const details = document.getElementById('quality-details');
-  if (target) {
-    const counts = quality?.class_counts || {};
-    target.innerHTML = `<div><strong>${counts['0'] || 0}</strong><span>Outcome 0</span></div><div><strong>${counts['1'] || 0}</strong><span>Outcome 1</span></div><div><strong>${summary?.missing_values ?? '—'}</strong><span>Missing values</span></div><div><strong>${summary?.duplicate_rows ?? '—'}</strong><span>Duplicate rows</span></div>`;
-  }
-  if (details) {
-    const ratio = Number(summary?.finite_value_ratio);
-    details.innerHTML = `<div><strong>${summary?.rows ?? '—'}</strong><span>Validated rows</span></div><div><strong>${Number.isFinite(ratio) ? `${(ratio * 100).toFixed(1)}%` : '—'}</strong><span>Finite numeric values</span></div>`;
-  }
-}
-
-async function loadBenchmark() {
-  const statusEl = document.getElementById('benchmark-status');
-  const table = document.getElementById('benchmark-table');
-  if (!statusEl || !table) return;
-  try {
-    const response = await fetch('/api/benchmark');
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Benchmark unavailable');
-    statusEl.textContent = `Selected model: ${data.selected_model || 'pending'} · ${data.selection_metric || 'ROC-AUC'} · version ${data.model_version || '—'}`;
-    if (!Array.isArray(data.models) || data.models.length === 0) {
-      table.textContent = 'No benchmark results are available yet.';
-      return;
-    }
-    const headers = ['Model', 'Accuracy', 'Precision', 'Recall', 'F1', 'ROC-AUC', 'PR-AUC'];
-    table.innerHTML = `<div class="benchmark-row benchmark-head">${headers.map((h) => `<span>${escapeHtml(h)}</span>`).join('')}</div>` +
-      data.models.map((row) => `<div class="benchmark-row"><strong>${escapeHtml(row.model)}</strong><span>${fmt(row.accuracy)}</span><span>${fmt(row.precision)}</span><span>${fmt(row.recall)}</span><span>${fmt(row.f1)}</span><span>${fmt(row.roc_auc)}</span><span>${fmt(row.pr_auc)}</span></div>`).join('');
-  } catch (error) {
-    statusEl.textContent = 'Benchmark artifacts are not available yet. Run the verified training pipeline first.';
-  }
-}
-
-async function loadExperiments() {
-  const statusEl = document.getElementById('experiment-status');
-  const table = document.getElementById('experiment-table');
-  if (!statusEl || !table) return;
-  try {
-    const response = await fetch('/api/experiments');
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Experiment history unavailable');
-    const records = Array.isArray(data.experiments) ? data.experiments : [];
-    statusEl.textContent = records.length ? `${records.length} reproducible experiment record${records.length === 1 ? '' : 's'}` : 'No experiment runs have been recorded yet.';
-    if (!records.length) {
-      table.innerHTML = '<div class="empty">Run the verified experiment pipeline to populate this lab.</div>';
-      return;
-    }
-    const headers = ['Experiment', 'Model', 'Dataset', 'Features', 'ROC-AUC', 'F1', 'Recorded (UTC)'];
-    table.innerHTML = `<div class="benchmark-row benchmark-head">${headers.map((h) => `<span>${escapeHtml(h)}</span>`).join('')}</div>` + records.slice().reverse().map((row) => `<div class="benchmark-row"><strong>${escapeHtml(row.experiment_id)}</strong><span>${escapeHtml(row.model_name)}</span><span>${escapeHtml(row.dataset_version)}</span><span>${escapeHtml(row.feature_count)}</span><span>${fmt(row.metrics?.roc_auc)}</span><span>${fmt(row.metrics?.f1)}</span><span>${escapeHtml(formatUtc(row.timestamp_utc))}</span></div>`).join('');
-  } catch (error) {
-    statusEl.textContent = 'Experiment registry is unavailable.';
-    table.innerHTML = '';
-  }
-}
-
-async function loadExplainability() {
-  const statusEl = document.getElementById('explainability-status');
-  const list = document.getElementById('importance-list');
-  if (!statusEl || !list) return;
-  try {
-    const response = await fetch('/api/explainability');
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Explainability unavailable');
-    statusEl.textContent = `Verified global importance · ${escapeHtml(data.model)}`;
-    list.innerHTML = data.importance.map((item) => `<div class="importance-row"><span>${escapeHtml(item.feature)}</span><div class="bar"><i style="width:${Math.min(100, Math.max(0, Number(item.importance) * 100))}%"></i></div><strong>${(Number(item.importance) * 100).toFixed(1)}%</strong></div>`).join('');
-  } catch (error) {
-    statusEl.textContent = 'Verified model explainability is unavailable until a compatible trained model is loaded.';
-  }
-}
-
-let baselineFeatures = null;
-function populateSensitivityFeatures(features) {
-  const select = document.getElementById('sensitivity-feature');
-  if (!select) return;
-  select.innerHTML = features.map((feature) => `<option value="${escapeHtml(feature)}">${escapeHtml(feature)}</option>`).join('');
-}
-
-function getBaselineFromForm() {
-  const fields = document.querySelectorAll('#fields input, #fields select');
-  const baseline = {};
-  fields.forEach((field) => { if (field.name) baseline[field.name] = Number(field.value); });
-  return baseline;
-}
-
-async function runSensitivity() {
-  const statusEl = document.getElementById('sensitivity-status');
-  const resultsEl = document.getElementById('sensitivity-results');
-  const feature = document.getElementById('sensitivity-feature')?.value;
-  const start = Number(document.getElementById('sensitivity-start')?.value);
-  const end = Number(document.getElementById('sensitivity-end')?.value);
-  const steps = Number(document.getElementById('sensitivity-steps')?.value);
-  if (!feature || !Number.isFinite(start) || !Number.isFinite(end) || !Number.isInteger(steps) || steps < 2 || steps > 25) {
-    statusEl.textContent = 'Enter valid start, end, and step values.';
-    return;
-  }
-  const baseline = baselineFeatures || getBaselineFromForm();
-  if (Object.keys(baseline).length !== 8 || Object.values(baseline).some((value) => !Number.isFinite(value))) {
-    statusEl.textContent = 'Complete a valid prediction form before running sensitivity analysis.';
-    return;
-  }
-  const values = Array.from({length: steps}, (_, index) => start + ((end - start) * index / (steps - 1)));
-  statusEl.textContent = 'Running verified model sensitivity…';
-  try {
-    const response = await fetch('/api/sensitivity', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({feature, baseline, values})});
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Sensitivity analysis unavailable');
-    resultsEl.innerHTML = data.results.map((row) => `<div class="sensitivity-row"><span>${Number(row.value).toFixed(2)}</span><div class="bar"><i style="width:${Math.min(100, Math.max(0, Number(row.probability) * 100))}%"></i></div><strong>${(Number(row.probability) * 100).toFixed(1)}%</strong></div>`).join('');
-    statusEl.textContent = `Sensitivity results for ${escapeHtml(data.feature)}. Model behavior only; not causal or clinical advice.`;
-  } catch (error) {
-    resultsEl.textContent = '';
-    statusEl.textContent = error.message || 'Sensitivity analysis unavailable.';
-  }
-}
-
-function fmt(value) {
-  return Number.isFinite(Number(value)) ? Number(value).toFixed(3) : '—';
-}
-
-function formatUtc(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : date.toISOString().replace('T', ' ').replace('.000Z', ' UTC');
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-}
-
-window.setPredictionBaseline = (features) => { baselineFeatures = {...features}; };
-document.getElementById('run-sensitivity')?.addEventListener('click', runSensitivity);
-loadDashboard();
-loadBenchmark();
-loadExplainability();
-loadExperiments();
+function renderQuality(quality,summary){const target=document.getElementById('target-stats'),details=document.getElementById('quality-details');if(target){const c=quality?.class_counts||{};target.innerHTML=`<div><strong>${c['0']||0}</strong><span>Outcome 0</span></div><div><strong>${c['1']||0}</strong><span>Outcome 1</span></div><div><strong>${summary?.missing_values??'—'}</strong><span>Missing values</span></div><div><strong>${summary?.duplicate_rows??'—'}</strong><span>Duplicate rows</span></div>`;}if(details){const ratio=Number(summary?.finite_value_ratio);details.innerHTML=`<div><strong>${summary?.rows??'—'}</strong><span>Validated rows</span></div><div><strong>${Number.isFinite(ratio)?`${(ratio*100).toFixed(1)}%`:'—'}</strong><span>Finite numeric values</span></div>`;}}
+async function loadBenchmark(){const s=document.getElementById('benchmark-status'),t=document.getElementById('benchmark-table');if(!s||!t)return;try{const r=await fetch('/api/benchmark'),d=await r.json();if(!r.ok)throw new Error(d.error);s.textContent=`Selected model: ${d.selected_model||'pending'} · ${d.selection_metric||'ROC-AUC'} · version ${d.model_version||'—'}`;if(!Array.isArray(d.models)||!d.models.length){t.textContent='No benchmark results are available yet.';return;}const h=['Model','Accuracy','Precision','Recall','F1','ROC-AUC','PR-AUC'];t.innerHTML=`<div class="benchmark-row benchmark-head">${h.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>`+d.models.map(x=>`<div class="benchmark-row"><strong>${escapeHtml(x.model)}</strong><span>${fmt(x.accuracy)}</span><span>${fmt(x.precision)}</span><span>${fmt(x.recall)}</span><span>${fmt(x.f1)}</span><span>${fmt(x.roc_auc)}</span><span>${fmt(x.pr_auc)}</span></div>`).join('');}catch{s.textContent='Benchmark artifacts are not available yet. Run the verified training pipeline first.';}}
+async function loadExperiments(){const s=document.getElementById('experiment-status'),t=document.getElementById('experiment-table');if(!s||!t)return;try{const r=await fetch('/api/experiments'),d=await r.json();if(!r.ok)throw new Error(d.error);const rows=Array.isArray(d.experiments)?d.experiments:[];s.textContent=rows.length?`${rows.length} reproducible experiment record${rows.length===1?'':'s'}`:'No experiment runs have been recorded yet.';if(!rows.length){t.innerHTML='<div class="empty">Run the verified experiment pipeline to populate this lab.</div>';return;}const h=['Experiment','Model','Dataset','Features','ROC-AUC','F1','Recorded (UTC)'];t.innerHTML=`<div class="benchmark-row benchmark-head">${h.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>`+rows.slice().reverse().map(x=>`<div class="benchmark-row"><strong>${escapeHtml(x.experiment_id)}</strong><span>${escapeHtml(x.model_name)}</span><span>${escapeHtml(x.dataset_version)}</span><span>${escapeHtml(x.feature_count)}</span><span>${fmt(x.metrics?.roc_auc)}</span><span>${fmt(x.metrics?.f1)}</span><span>${escapeHtml(formatUtc(x.timestamp_utc))}</span></div>`).join('');}catch{s.textContent='Experiment registry is unavailable.';t.innerHTML='';}}
+async function loadExplainability(){const s=document.getElementById('explainability-status'),list=document.getElementById('importance-list');if(!s||!list)return;try{const r=await fetch('/api/explainability'),d=await r.json();if(!r.ok)throw new Error(d.error);s.textContent=`Verified global importance · ${escapeHtml(d.model)}`;list.innerHTML=d.importance.map(x=>`<div class="importance-row"><span>${escapeHtml(x.feature)}</span><div class="bar"><i style="width:${Math.min(100,Math.max(0,Number(x.importance)*100))}%"></i></div><strong>${(Number(x.importance)*100).toFixed(1)}%</strong></div>`).join('');}catch{s.textContent='Verified model explainability is unavailable until a compatible trained model is loaded.';}}
+async function loadEDA(){const s=document.getElementById('eda-status');if(!s)return;try{const r=await fetch('/api/eda'),d=await r.json();if(!r.ok)throw new Error(d.error);s.textContent=`${Number(d.rows).toLocaleString()} validated records · descriptive, correlation and outcome analyses`;renderTable('eda-outcomes',['Outcome','Count','Percentage'],d.outcomes,x=>[x.outcome,x.count,`${Number(x.percentage).toFixed(2)}%`]);renderTable('eda-statistics',['Feature','Mean','Std','Min','Max'],d.statistics,x=>[x.feature,fmt(x.mean),fmt(x.std),fmt(x.min),fmt(x.max)]);const corr=Object.entries(d.correlation||{}).map(([feature,row])=>({feature,target:row.Outcome}));renderTable('eda-correlation',['Feature','Outcome correlation'],corr,x=>[x.feature,fmt(x.target)]);renderTable('eda-grouped',['Feature','Outcome 0 mean','Outcome 1 mean'],d.feature_by_outcome,x=>[x.feature,fmt(x['0']),fmt(x['1'])]);}catch{s.textContent='EDA analytics are unavailable until the validated dataset is loaded.';}}
+function renderTable(id,headers,rows,map){const el=document.getElementById(id);if(!el)return;if(!rows?.length){el.innerHTML='<div class="empty">No analytics available.</div>';return;}el.innerHTML=`<div class="mini-row mini-head">${headers.map(escapeHtml).map(x=>`<span>${x}</span>`).join('')}</div>`+rows.map(row=>`<div class="mini-row">${map(row).map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>`).join('');}
+let baselineFeatures=null;function populateSensitivityFeatures(features){const select=document.getElementById('sensitivity-feature');if(select)select.innerHTML=features.map(f=>`<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');}
+function getBaselineFromForm(){const baseline={};document.querySelectorAll('#fields input,#fields select').forEach(f=>{if(f.name)baseline[f.name]=Number(f.value);});return baseline;}
+async function runSensitivity(){const s=document.getElementById('sensitivity-status'),out=document.getElementById('sensitivity-results'),feature=document.getElementById('sensitivity-feature')?.value,start=Number(document.getElementById('sensitivity-start')?.value),end=Number(document.getElementById('sensitivity-end')?.value),steps=Number(document.getElementById('sensitivity-steps')?.value);if(!feature||!Number.isFinite(start)||!Number.isFinite(end)||!Number.isInteger(steps)||steps<2||steps>25){s.textContent='Enter valid start, end, and step values.';return;}const baseline=baselineFeatures||getBaselineFromForm();if(Object.keys(baseline).length!==8||Object.values(baseline).some(v=>!Number.isFinite(v))){s.textContent='Complete a valid prediction form before running sensitivity analysis.';return;}const values=Array.from({length:steps},(_,i)=>start+(end-start)*i/(steps-1));s.textContent='Running verified model sensitivity…';try{const r=await fetch('/api/sensitivity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({feature,baseline,values})}),d=await r.json();if(!r.ok)throw new Error(d.error);out.innerHTML=d.results.map(x=>`<div class="sensitivity-row"><span>${Number(x.value).toFixed(2)}</span><div class="bar"><i style="width:${Math.min(100,Math.max(0,Number(x.probability)*100))}%"></i></div><strong>${(Number(x.probability)*100).toFixed(1)}%</strong></div>`).join('');s.textContent=`Sensitivity results for ${escapeHtml(d.feature)}. Model behavior only; not causal or clinical advice.`;}catch(e){out.textContent='';s.textContent=e.message||'Sensitivity analysis unavailable.';}}
+function fmt(v){return Number.isFinite(Number(v))?Number(v).toFixed(3):'—';}function formatUtc(v){const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toISOString().replace('T',' ').replace('.000Z',' UTC');}function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+window.setPredictionBaseline=f=>{baselineFeatures={...f};};document.getElementById('run-sensitivity')?.addEventListener('click',runSensitivity);loadDashboard();loadBenchmark();loadExplainability();loadExperiments();loadEDA();
