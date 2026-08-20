@@ -1,0 +1,1 @@
+"""Smart Healthcare source package."""
