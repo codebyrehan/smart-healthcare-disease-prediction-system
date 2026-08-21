@@ -22,6 +22,12 @@ MODEL_PATH = Path(os.getenv("MODEL_PATH", "models/best_model.joblib"))
 MODEL = None
 DATASET = None
 LOAD_ERROR = None
+MODEL_REGISTRY = {}
+MODEL_ALIASES = {
+    "Logistic Regression": "logistic_regression",
+    "Decision Tree": "decision_tree",
+    "Random Forest": "random_forest",
+}
 
 try:
     DATASET, _ = clean_features(load_dataset())
@@ -30,12 +36,6 @@ except Exception as exc:
 
 
 def load_or_train_model():
-    """Load the verified artifact; when absent, train a reproducible fallback from the repository dataset.
-
-    This keeps the deployed educational application functional without fabricating data or
-    silently changing the dataset. The fallback is a Random Forest trained on the same
-    validated PIMA data used by the project and is explicitly marked as runtime-trained.
-    """
     import joblib
     from sklearn.ensemble import RandomForestClassifier
 
@@ -48,15 +48,51 @@ def load_or_train_model():
     return model
 
 
+def build_model_registry():
+    """Build the three project models so model selection is functional at runtime."""
+    if DATASET is None:
+        return {}
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.tree import DecisionTreeClassifier
+
+    return {
+        "logistic_regression": Pipeline([
+            ("scaler", StandardScaler()),
+            ("model", LogisticRegression(max_iter=1000, random_state=42)),
+        ]),
+        "decision_tree": DecisionTreeClassifier(max_depth=5, random_state=42),
+        "random_forest": RandomForestClassifier(n_estimators=300, random_state=42, class_weight="balanced", n_jobs=-1),
+    }
+
+
 try:
     MODEL = load_or_train_model()
+    MODEL_REGISTRY = build_model_registry()
+    if DATASET is not None:
+        for _model in MODEL_REGISTRY.values():
+            _model.fit(DATASET[FEATURES], DATASET[TARGET])
+    if MODEL is not None and "random_forest" not in MODEL_REGISTRY:
+        MODEL_REGISTRY["random_forest"] = MODEL
 except Exception as exc:
     LOAD_ERROR = LOAD_ERROR or str(exc)
 
 
 @app.get("/api/health")
 def health():
-    return jsonify({"status": "ok", "model_loaded": MODEL is not None, "dataset_loaded": DATASET is not None})
+    return jsonify({
+        "status": "ok",
+        "model_loaded": MODEL is not None,
+        "dataset_loaded": DATASET is not None,
+        "available_models": list(MODEL_ALIASES),
+    })
+
+
+@app.get("/api/models")
+def models():
+    return jsonify({"models": list(MODEL_ALIASES), "default": "Logistic Regression"})
 
 
 @app.get("/api/metadata")
@@ -82,7 +118,6 @@ def eda():
 
 @app.get("/api/report")
 def report():
-    """Generate a lightweight, evidence-based HTML analysis report."""
     if DATASET is None:
         return jsonify({"error": "Validated dataset is unavailable."}), 503
     stats = summary_statistics(DATASET).round(3).to_dict(orient="records")
@@ -125,12 +160,16 @@ def explainability():
 
 @app.post("/api/sensitivity")
 def sensitivity():
-    if MODEL is None:
-        return jsonify({"error": "Prediction model is unavailable."}), 503
+    if not MODEL_REGISTRY:
+        return jsonify({"error": "Prediction models are unavailable."}), 503
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
         return jsonify({"error": "Request body must be a JSON object."}), 400
     feature, baseline, values = payload.get("feature"), payload.get("baseline"), payload.get("values")
+    model_name = payload.get("model", "Logistic Regression")
+    key = MODEL_ALIASES.get(model_name)
+    if key not in MODEL_REGISTRY:
+        return jsonify({"error": "Unsupported model selection."}), 400
     if not isinstance(feature, str) or not isinstance(baseline, dict) or not isinstance(values, list):
         return jsonify({"error": "feature, baseline, and values are required."}), 400
     if len(values) > 25:
@@ -138,22 +177,26 @@ def sensitivity():
     try:
         clean_baseline = {name: float(baseline[name]) for name in FEATURES}
         clean_values = [float(value) for value in values]
-        result = sensitivity_analysis(MODEL, clean_baseline, feature, clean_values)
-        return jsonify({"feature": feature, "results": result, "disclaimer": "Sensitivity analysis describes model behavior; it does not establish causation or provide medical advice."})
+        result = sensitivity_analysis(MODEL_REGISTRY[key], clean_baseline, feature, clean_values)
+        return jsonify({"feature": feature, "model": model_name, "results": result, "disclaimer": "Sensitivity analysis describes model behavior; it does not establish causation or provide medical advice."})
     except (KeyError, TypeError, ValueError, OverflowError) as exc:
         return jsonify({"error": str(exc)}), 400
 
 
 @app.post("/api/predict")
 def api_predict():
-    if MODEL is None:
-        return jsonify({"error": "Prediction model is unavailable. Train and persist the verified model first."}), 503
+    if not MODEL_REGISTRY:
+        return jsonify({"error": "Prediction models are unavailable."}), 503
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
         return jsonify({"error": "Request body must be a JSON object."}), 400
+    model_name = payload.pop("model", "Logistic Regression")
+    key = MODEL_ALIASES.get(model_name)
+    if key not in MODEL_REGISTRY:
+        return jsonify({"error": "Unsupported model selection."}), 400
     try:
-        result = predict(MODEL, payload)
-        result["disclaimer"] = "Educational ML prediction only; not a medical diagnosis or substitute for professional care."
+        result = predict(MODEL_REGISTRY[key], payload)
+        result.update({"model": model_name, "disclaimer": "Educational ML prediction only; not a medical diagnosis or substitute for professional care."})
         return jsonify(result)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
