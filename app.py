@@ -71,12 +71,18 @@ def build_model_registry():
 try:
     MODEL = load_or_train_model()
     MODEL_REGISTRY = build_model_registry()
-    for _name, _model in MODEL_REGISTRY.items():
-        _model.fit(DATASET[FEATURES], DATASET[TARGET])
+    if DATASET is not None:
+        for _model in MODEL_REGISTRY.values():
+            _model.fit(DATASET[FEATURES], DATASET[TARGET])
     if MODEL is not None and not MODEL_REGISTRY.get("random_forest"):
         MODEL_REGISTRY["random_forest"] = MODEL
 except Exception as exc:
     LOAD_ERROR = LOAD_ERROR or str(exc)
+
+
+def selected_model_name(default="Logistic Regression"):
+    requested = request.args.get("model", default)
+    return requested if requested in MODEL_ALIASES and MODEL_ALIASES[requested] in MODEL_REGISTRY else default
 
 
 @app.get("/api/health")
@@ -86,7 +92,7 @@ def health():
 
 @app.get("/api/models")
 def models():
-    return jsonify({"models": list(MODEL_ALIASES), "default": "Random Forest" if "random_forest" in MODEL_REGISTRY else "Logistic Regression"})
+    return jsonify({"models": list(MODEL_ALIASES), "default": "Logistic Regression"})
 
 
 @app.get("/api/metadata")
@@ -112,7 +118,11 @@ def evaluation():
     if not path.exists():
         return jsonify({"error": "Advanced evaluation artifacts are unavailable. Run the verified training pipeline."}), 503
     try:
-        return jsonify(json.loads(path.read_text(encoding="utf-8")))
+        artifact = json.loads(path.read_text(encoding="utf-8"))
+        requested = request.args.get("model")
+        if requested in MODEL_ALIASES and isinstance(artifact.get("models"), dict) and requested in artifact["models"]:
+            artifact["selected_model"] = requested
+        return jsonify(artifact)
     except (OSError, json.JSONDecodeError):
         return jsonify({"error": "Evaluation artifact is invalid."}), 500
 
@@ -151,23 +161,25 @@ def experiments():
 
 @app.get("/api/explainability")
 def explainability():
-    if MODEL is None:
-        return jsonify({"error": "Prediction model is unavailable."}), 503
-    values = global_feature_importance(MODEL, FEATURES)
+    if not MODEL_REGISTRY:
+        return jsonify({"error": "Prediction models are unavailable."}), 503
+    model_name = selected_model_name()
+    model = MODEL_REGISTRY[MODEL_ALIASES[model_name]]
+    values = global_feature_importance(model, FEATURES)
     if not values:
-        return jsonify({"error": "This model does not expose verified global feature importance."}), 503
-    return jsonify({"model": MODEL.__class__.__name__, "importance": values})
+        return jsonify({"error": "This selected model does not expose verified global feature importance."}), 503
+    return jsonify({"model": model_name, "importance": values})
 
 
 @app.post("/api/sensitivity")
 def sensitivity():
-    if MODEL is None:
-        return jsonify({"error": "Prediction model is unavailable."}), 503
+    if not MODEL_REGISTRY:
+        return jsonify({"error": "Prediction models are unavailable."}), 503
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
         return jsonify({"error": "Request body must be a JSON object."}), 400
     feature, baseline, values = payload.get("feature"), payload.get("baseline"), payload.get("values")
-    model_name = payload.get("model", "Random Forest")
+    model_name = payload.get("model", "Logistic Regression")
     key = MODEL_ALIASES.get(model_name)
     if key not in MODEL_REGISTRY:
         return jsonify({"error": "Unsupported model selection."}), 400
@@ -190,7 +202,7 @@ def api_predict():
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
         return jsonify({"error": "Request body must be a JSON object."}), 400
-    model_name = payload.pop("model", "Random Forest")
+    model_name = payload.pop("model", "Logistic Regression")
     key = MODEL_ALIASES.get(model_name)
     if key not in MODEL_REGISTRY:
         return jsonify({"error": "Unsupported model selection."}), 400
