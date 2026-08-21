@@ -4,31 +4,16 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Smart Healthcare AI clinical intelligence and diabetes risk prediction platform">
   <title>Smart Healthcare | AI Clinical Intelligence</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/3d-healthcare.css">
 </head>
 <body>
 <main class="shell">
 <header class="hero hero-3d" id="top">
-  <div class="hero-copy">
-    <p class="eyebrow">SMART HEALTHCARE · AI CLINICAL INTELLIGENCE</p>
-    <h1>Predict with<br><span>intelligence.</span></h1>
-    <p class="subtitle">A data-driven diabetes risk analysis workspace where validated health parameters meet reproducible machine learning.</p>
-    <div class="hero-actions"><a class="hero-cta" href="#prediction">Start risk assessment <span>→</span></a><span class="hero-note"><i></i> PIMA dataset · educational research</span></div>
-  </div>
-  <div class="health-orb" aria-label="Interactive healthcare AI visualization">
-    <div class="orb-halo"></div><div class="orb-grid"></div>
-    <div class="orb-core"><div class="pulse-ring"></div><div class="heart-mark">✚</div><small>AI HEALTH</small></div>
-    <div class="orbit orbit-one"><span class="data-node node-glucose">GLUCOSE <b>↗</b></span><span class="data-node node-bmi">BMI <b>↗</b></span></div>
-    <div class="orbit orbit-two"><span class="data-node node-bp">BP <b>↗</b></span><span class="data-node node-age">AGE <b>↗</b></span></div>
-    <div class="orbit orbit-three"><span class="data-node node-insulin">INSULIN <b>↗</b></span></div>
-    <div class="scan-line"></div>
-  </div>
+  <div class="hero-copy"><p class="eyebrow">SMART HEALTHCARE · AI CLINICAL INTELLIGENCE</p><h1>Predict with<br><span>intelligence.</span></h1><p class="subtitle">A data-driven diabetes risk analysis workspace where validated health parameters meet reproducible machine learning.</p><div class="hero-actions"><a class="hero-cta" href="#prediction">Start risk assessment <span>→</span></a><span class="hero-note"><i></i> PIMA dataset · educational research</span></div></div>
+  <div class="health-orb" aria-label="Interactive healthcare AI visualization"><div class="orb-halo"></div><div class="orb-grid"></div><div class="orb-core"><div class="pulse-ring"></div><div class="heart-mark">✚</div><small>AI HEALTH</small></div><div class="orbit orbit-one"><span class="data-node node-glucose">GLUCOSE <b>↗</b></span><span class="data-node node-bmi">BMI <b>↗</b></span></div><div class="orbit orbit-two"><span class="data-node node-bp">BP <b>↗</b></span><span class="data-node node-age">AGE <b>↗</b></span></div><div class="orbit orbit-three"><span class="data-node node-insulin">INSULIN <b>↗</b></span></div><div class="scan-line"></div></div>
 </header>
 <section class="stats card glass-stats"><div><span>Dataset status</span><strong id="dashboard-status">Loading validated dataset…</strong></div><div id="target-stats" class="target-stats"></div></section>
-<section class="grid" id="prediction">
-<form id="prediction-form" class="card prediction-card"><div class="card-heading"><span class="section-kicker">01 · CLINICAL INPUT</span><h2>Risk assessment</h2><p>Enter patient parameters within the validated research ranges.</p></div><div id="fields" class="form-grid"></div><button type="submit" id="predict-button">Run AI assessment <span>↗</span></button><p id="form-error" class="error" role="alert"></p></form>
-<section class="card result-card result-stage" aria-live="polite"><div class="card-heading"><span class="section-kicker">02 · MODEL INTELLIGENCE</span><h2>Prediction signal</h2><p>Educational prediction, not medical diagnosis.</p></div><div class="signal-ring"><div id="result" class="result empty">Complete the assessment to generate a prediction.</div></div><div class="notice">Use this system for Data Science demonstration only. Consult a qualified healthcare professional for medical decisions.</div></section>
-</section>
+<section class="grid" id="prediction"><form id="prediction-form" class="card prediction-card"><div class="card-heading"><span class="section-kicker">01 · CLINICAL INPUT</span><h2>Risk assessment</h2><p>Enter patient parameters within the validated research ranges.</p></div><div id="fields" class="form-grid"></div><button type="submit" id="predict-button">Run AI assessment <span>↗</span></button><p id="form-error" class="error" role="alert"></p></form><section class="card result-card result-stage" aria-live="polite"><div class="card-heading"><span class="section-kicker">02 · MODEL INTELLIGENCE</span><h2>Prediction signal</h2><p>Educational prediction, not medical diagnosis.</p></div><div class="signal-ring"><div id="result" class="result empty">Complete the assessment to generate a prediction.</div></div><div class="notice">Use this system for Data Science demonstration only. Consult a qualified healthcare professional for medical decisions.</div></section></section>
 <section class="card benchmark-card"><div class="card-heading"><span class="section-kicker">03 · MODEL LAB</span><h2>Model Benchmark Center</h2><p>Compare Logistic Regression, Decision Tree and Random Forest using verified artifacts.</p></div><div id="benchmark-status" class="muted">Loading benchmark…</div><div id="benchmark-table" class="benchmark-table"></div></section>
 <section class="advanced-grid"><section class="card"><div class="card-heading"><span class="section-kicker">04 · EXPLAINABLE AI</span><h2>Explainability Center</h2><p>Understand which validated features influence model behavior.</p></div><div id="explainability-status" class="muted">Loading verified explainability…</div><div id="importance-list" class="importance-list"></div></section><section class="card"><div class="card-heading"><span class="section-kicker">DATA TRUST</span><h2>Data Quality</h2><p>Validated dataset integrity and coverage.</p></div><div id="quality-details" class="quality-details"><span>Waiting for dataset analytics…</span></div></section></section>
 <section class="card analytics-card"><div class="card-heading"><div><span class="section-kicker">05 · DATA INTELLIGENCE</span><h2>EDA & Analytics Center</h2><p>Descriptive statistics, class balance, feature-outcome patterns and correlation analysis.</p></div><a class="button-link" href="/api/report">Download report</a></div><div id="eda-status" class="muted">Loading EDA…</div><div class="eda-grid"><div><h3>Outcome distribution</h3><div id="eda-outcomes" class="mini-table"></div></div><div><h3>Feature statistics</h3><div id="eda-statistics" class="mini-table"></div></div><div><h3>Feature ↔ outcome correlation</h3><div id="eda-correlation" class="mini-table"></div></div><div><h3>Mean feature values by outcome</h3><div id="eda-grouped" class="mini-table"></div></div></div></section>
@@ -37,5 +22,5 @@
 <section class="card experiment-card"><div class="card-heading"><span class="section-kicker">08 · RESEARCH LAB</span><h2>Experiment Lab</h2><p>Reproducible records for in-scope machine-learning experiments.</p></div><div id="experiment-status" class="muted">Loading experiment history…</div><div id="experiment-table" class="experiment-table"></div></section>
 <section class="card responsible"><div class="card-heading"><span class="section-kicker">09 · RESPONSIBLE AI</span><h2>Responsible AI & Limitations</h2><p>Transparent interpretation of this educational healthcare ML system.</p></div><ul><li>The PIMA dataset is historical and limited to the population represented by its source; generalization to other populations is not guaranteed.</li><li>A model probability is not a diagnosis, prognosis, treatment recommendation, or causal estimate.</li><li>Feature importance describes model behavior and must not be interpreted as medical causation.</li><li>Results depend on data quality, preprocessing, model version and evaluation design.</li></ul></section>
 <footer class="footer">Smart Healthcare · AI/Data Science project · Mohd Rehan · 25SCS1003003208</footer>
-</main><script src="/static/app.js"></script><script src="/static/dashboard.js"></script>
+</main><script src="/static/app.js"></script><script src="/static/dashboard.js"></script><script src="/static/3d-healthcare.js"></script>
 </body></html>
