@@ -1,0 +1,49 @@
+{
+  "model": "Random Forest",
+  "model_version": "2026.2.0",
+  "selection_metric": "roc_auc",
+  "random_state": 42,
+  "feature_names": [
+    "Pregnancies",
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI",
+    "DiabetesPedigreeFunction",
+    "Age"
+  ],
+  "dataset": "PIMA Indians Diabetes Dataset",
+  "dataset_rows_after_cleaning": 768,
+  "data_quality": {
+    "rows_total": 768,
+    "duplicates": 0,
+    "features_count": 8,
+    "imputation": {
+      "Glucose": {
+        "zeros_imputed": 5,
+        "imputed_median": 117.0
+      },
+      "BloodPressure": {
+        "zeros_imputed": 35,
+        "imputed_median": 72.0
+      },
+      "SkinThickness": {
+        "zeros_imputed": 227,
+        "imputed_median": 29.0
+      },
+      "Insulin": {
+        "zeros_imputed": 374,
+        "imputed_median": 125.0
+      },
+      "BMI": {
+        "zeros_imputed": 11,
+        "imputed_median": 32.3
+      }
+    },
+    "class_distribution": {
+      "0": 500,
+      "1": 268
+    }
+  }
+}

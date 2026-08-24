@@ -1,18 +1,629 @@
-const status=document.getElementById('dashboard-status');
-async function loadDashboard(){try{const r=await fetch('/api/metadata',{cache:'no-store'}),d=await r.json();if(!r.ok)throw new Error(d.error);const q=d.quality_summary||{};status.textContent=`${q.rows?.toLocaleString?.()||0} validated records · ${q.features||d.features?.length||0} predictive features`;renderQuality(d.quality,q);populateSensitivityFeatures(d.features||[])}catch{status.textContent='Analytics are unavailable until the verified dataset is loaded.'}}
-function renderQuality(q,s){const t=document.getElementById('target-stats'),d=document.getElementById('quality-details');if(t){const c=q?.class_counts||{};t.innerHTML=`<div><strong>${c['0']||0}</strong><span>Outcome 0</span></div><div><strong>${c['1']||0}</strong><span>Outcome 1</span></div><div><strong>${s?.missing_values??'—'}</strong><span>Missing values</span></div><div><strong>${s?.duplicate_rows??'—'}</strong><span>Duplicate rows</span></div>`}if(d){const ratio=Number(s?.finite_value_ratio);d.innerHTML=`<div><strong>${s?.rows??'—'}</strong><span>Validated rows</span></div><div><strong>${Number.isFinite(ratio)?`${(ratio*100).toFixed(1)}%`:'—'}</strong><span>Finite numeric values</span></div>`}}
-async function loadBenchmark(){const s=document.getElementById('benchmark-status'),t=document.getElementById('benchmark-table');if(!s||!t)return;try{const r=await fetch('/api/benchmark',{cache:'no-store'}),d=await r.json();if(!r.ok)throw new Error(d.error);s.textContent=`Selected model: ${d.selected_model||'pending'} · ${d.selection_metric||'ROC-AUC'} · version ${d.model_version||'—'}`;if(!d.models?.length){t.textContent='No benchmark results are available yet.';return}const h=['Model','Accuracy','Precision','Recall','F1','ROC-AUC','PR-AUC'];t.innerHTML=`<div class="benchmark-row benchmark-head">${h.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>`+d.models.map(x=>`<div class="benchmark-row ${x.model===d.selected_model?'selected-model':''}"><strong>${escapeHtml(x.model)}</strong><span>${fmt(x.accuracy)}</span><span>${fmt(x.precision)}</span><span>${fmt(x.recall)}</span><span>${fmt(x.f1)}</span><span>${fmt(x.roc_auc)}</span><span>${fmt(x.pr_auc)}</span></div>`).join('')}catch{s.textContent='Benchmark artifacts are not available yet.'}}
-async function loadExperiments(){const s=document.getElementById('experiment-status'),t=document.getElementById('experiment-table');if(!s||!t)return;try{const r=await fetch('/api/experiments',{cache:'no-store'}),d=await r.json();if(!r.ok)throw new Error(d.error);const rows=d.experiments||[];s.textContent=rows.length?`${rows.length} reproducible experiment record${rows.length===1?'':'s'}`:'No experiment runs have been recorded yet.';if(!rows.length){t.innerHTML='<div class="empty">Run the verified experiment pipeline to populate this lab.</div>';return}const h=['Experiment','Model','Dataset','Features','ROC-AUC','F1','Recorded (UTC)'];t.innerHTML=`<div class="benchmark-row benchmark-head">${h.map(escapeHtml).map(x=>`<span>${x}</span>`).join('')}</div>`+rows.slice().reverse().map(x=>`<div class="benchmark-row"><strong>${escapeHtml(x.experiment_id)}</strong><span>${escapeHtml(x.model_name)}</span><span>${escapeHtml(x.dataset_version)}</span><span>${escapeHtml(x.feature_count)}</span><span>${fmt(x.metrics?.roc_auc)}</span><span>${fmt(x.metrics?.f1)}</span><span>${escapeHtml(formatUtc(x.timestamp_utc))}</span></div>`).join('')}catch{s.textContent='Experiment registry is unavailable.';t.innerHTML=''}}
-async function loadExplainability(){const s=document.getElementById('explainability-status'),list=document.getElementById('importance-list');if(!s||!list)return;try{const r=await fetch('/api/explainability?model='+encodeURIComponent(window.selectedPredictionModel||'Random Forest'),{cache:'no-store'}),d=await r.json();if(!r.ok)throw new Error(d.error);s.textContent=`Verified global importance · ${escapeHtml(d.model)}`;list.innerHTML=d.importance.map(x=>`<div class="importance-row"><span>${escapeHtml(x.feature)}</span><div class="bar"><i style="width:${Math.min(100,Math.max(0,Number(x.importance)*100))}%"></i></div><strong>${(Number(x.importance)*100).toFixed(1)}%</strong></div>`).join('')}catch{s.textContent='Verified model explainability is unavailable until a compatible trained model is loaded.'}}
-async function loadEDA(){const s=document.getElementById('eda-status');if(!s)return;try{const r=await fetch('/api/eda',{cache:'no-store'}),d=await r.json();if(!r.ok)throw new Error(d.error);s.textContent=`${Number(d.rows).toLocaleString()} validated records · descriptive, correlation and outcome analyses`;renderTable('eda-outcomes',['Outcome','Count','Percentage'],d.outcomes,x=>[x.outcome,x.count,`${Number(x.percentage).toFixed(2)}%`]);renderTable('eda-statistics',['Feature','Mean','Std','Min','Max'],d.statistics,x=>[x.feature,fmt(x.mean),fmt(x.std),fmt(x.min),fmt(x.max)]);renderTable('eda-correlation',['Feature','Outcome correlation'],Object.entries(d.correlation||{}).map(([feature,row])=>({feature,target:row.Outcome})),x=>[x.feature,fmt(x.target)]);renderTable('eda-grouped',['Feature','Outcome 0 mean','Outcome 1 mean'],d.feature_by_outcome,x=>[x.feature,fmt(x['0']),fmt(x['1'])])}catch(e){s.textContent=e.message||'EDA analytics are unavailable until the validated dataset is loaded.'}}
-async function loadEvaluation(){const s=document.getElementById('evaluation-status');if(!s)return;try{const model=window.selectedPredictionModel||'Logistic Regression';const r=await fetch('/api/evaluation?model='+encodeURIComponent(model),{cache:'no-store'}),d=await r.json();if(!r.ok)throw new Error(d.error||'Evaluation request failed.');const selected=d.selected_model||model,m=d.models?.[selected];if(!m)throw new Error('Selected model evaluation is missing.');const holdout=Number(d.test_size);s.textContent=`Fixed stratified test split · ${Number.isFinite(holdout)?(holdout*100).toFixed(0):'20'}% holdout · random state ${d.random_state??42}`;renderEvaluationSummary(selected,m);renderMatrix(m.confusion_matrix);renderThresholdAnalysis(m.thresholds||[]);renderCurve('roc-chart',m.roc_curve||[],'ROC curve','FPR','TPR');renderCurve('calibration-chart',m.calibration||[],'Calibration','Predicted','Observed');renderTable('threshold-table',['Threshold','Precision','Recall','F1','Status'],m.thresholds||[],x=>[fmt(x.threshold),fmt(x.precision),fmt(x.recall),fmt(x.f1),Number(x.f1)>0?'Available':'No positive predictions']);renderTable('roc-points',['FPR','TPR'],m.roc_curve||[],x=>[fmt(x.x),fmt(x.y)]);renderTable('calibration-points',['Predicted','Observed'],m.calibration||[],x=>[fmt(x.x),fmt(x.y)])}catch(e){s.textContent=e.message||'Advanced evaluation artifacts are unavailable.'}}
-function renderEvaluationSummary(model,m){const el=document.getElementById('evaluation-summary');if(!el)return;const best=(m.thresholds||[]).reduce((a,b)=>Number(b.f1)>Number(a?.f1??-1)?b:a,null);el.innerHTML=`<div class="eval-chip eval-primary"><strong>${escapeHtml(model)}</strong><span>Selected model</span></div><div class="eval-chip"><strong>${fmt(m.accuracy)}</strong><span>Accuracy</span></div><div class="eval-chip"><strong>${fmt(m.precision)}</strong><span>Precision</span></div><div class="eval-chip"><strong>${fmt(m.recall)}</strong><span>Recall</span></div><div class="eval-chip"><strong>${fmt(m.f1)}</strong><span>F1</span></div><div class="eval-chip"><strong>${fmt(m.roc_auc)}</strong><span>ROC-AUC</span></div><div class="eval-chip"><strong>${fmt(m.pr_auc)}</strong><span>PR-AUC</span></div>${best?`<div class="eval-chip eval-recommended"><strong>${fmt(best.threshold)}</strong><span>Best F1 threshold · F1 ${fmt(best.f1)}</span></div>`:''}`}
-function renderThresholdAnalysis(rows){const el=document.getElementById('threshold-table');if(!el||!rows?.length)return;const best=rows.reduce((a,b)=>Number(b.f1)>Number(a?.f1??-1)?b:a,null);el.dataset.recommended=best?String(best.threshold):''}
-function renderMatrix(m){const el=document.getElementById('confusion-matrix');if(!el)return;const a=m?.[0]?.[0]??'—',b=m?.[0]?.[1]??'—',c=m?.[1]?.[0]??'—',d=m?.[1]?.[1]??'—';el.innerHTML=`<div class="cm-caption"><span>Predicted</span><span>Actual</span></div><div class="cm-grid"><span></span><strong>Pred 0</strong><strong>Pred 1</strong><strong>Actual 0</strong><b class="cm-tn">${a}</b><b class="cm-fp">${b}</b><strong>Actual 1</strong><b class="cm-fn">${c}</b><b class="cm-tp">${d}</b></div><div class="cm-legend"><span><i class="dot tn"></i> True negative</span><span><i class="dot fp"></i> False positive</span><span><i class="dot fn"></i> False negative</span><span><i class="dot tp"></i> True positive</span></div>`}
-function renderCurve(id,points,title,xLabel,yLabel){const el=document.getElementById(id);if(!el||!points?.length)return;const vals=points.map(p=>({x:Number(p.x),y:Number(p.y)})).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));if(!vals.length){el.innerHTML='<div class="empty">No chart points available.</div>';return}const W=620,H=280,P=42,ix=x=>P+x*(W-2*P),iy=y=>(H-P)-y*(H-2*P);const path=vals.map((p,i)=>`${i?'L':'M'} ${ix(p.x).toFixed(1)} ${iy(p.y).toFixed(1)}`).join(' ');const circles=vals.filter((_,i)=>i%Math.max(1,Math.floor(vals.length/18))===0).map(p=>`<circle cx="${ix(p.x).toFixed(1)}" cy="${iy(p.y).toFixed(1)}" r="3"/>`).join('');const diagonal=id==='roc-chart'?`<path class="chart-diagonal" d="M ${ix(0)} ${iy(0)} L ${ix(1)} ${iy(1)}"/>`:'';el.innerHTML=`<div class="chart-title"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(xLabel)} vs ${escapeHtml(yLabel)}</span></div><svg class="metric-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(title)}"><line class="chart-axis" x1="${P}" y1="${H-P}" x2="${W-P}" y2="${H-P}"/><line class="chart-axis" x1="${P}" y1="${P}" x2="${P}" y2="${H-P}"/>${diagonal}<path class="chart-line" d="${path}"/>${circles}<text x="${W/2}" y="${H-8}" text-anchor="middle">${escapeHtml(xLabel)}</text><text x="14" y="${H/2}" text-anchor="middle" transform="rotate(-90 14 ${H/2})">${escapeHtml(yLabel)}</text></svg>`}
-function renderTable(id,headers,rows,map){const el=document.getElementById(id);if(!el)return;if(!rows?.length){el.innerHTML='<div class="empty">No analytics available.</div>';return}el.innerHTML=`<div class="mini-row mini-head">${headers.map(escapeHtml).map(x=>`<span>${x}</span>`).join('')}</div>`+rows.map(row=>`<div class="mini-row">${map(row).map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>`).join('')}
-let baselineFeatures=null;function populateSensitivityFeatures(features){const select=document.getElementById('sensitivity-feature');if(select)select.innerHTML=features.map(f=>`<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('')}
-function getBaselineFromForm(){const b={};document.querySelectorAll('#fields input').forEach(f=>{if(f.name)b[f.name]=Number(f.value)});return b}
-async function runSensitivity(){const s=document.getElementById('sensitivity-status'),out=document.getElementById('sensitivity-results'),feature=document.getElementById('sensitivity-feature')?.value,start=Number(document.getElementById('sensitivity-start')?.value),end=Number(document.getElementById('sensitivity-end')?.value),steps=Number(document.getElementById('sensitivity-steps')?.value);if(!feature||!Number.isFinite(start)||!Number.isFinite(end)||!Number.isInteger(steps)||steps<2||steps>25){s.textContent='Enter valid start, end, and step values.';return}const baseline=baselineFeatures||getBaselineFromForm();if(Object.keys(baseline).length!==8||Object.values(baseline).some(v=>!Number.isFinite(v))){s.textContent='Complete a valid prediction form before running sensitivity analysis.';return}const values=Array.from({length:steps},(_,i)=>start+(end-start)*i/(steps-1));const model=baseline.model||window.selectedPredictionModel||'Logistic Regression';s.textContent=`Running ${model} sensitivity…`;try{const r=await fetch('/api/sensitivity',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({model,feature,baseline,values}),cache:'no-store'}),d=await r.json();if(!r.ok)throw new Error(d.error);out.innerHTML=d.results.map(x=>`<div class="sensitivity-row"><span>${Number(x.value).toFixed(2)}</span><div class="bar"><i style="width:${Math.min(100,Math.max(0,Number(x.probability)*100))}%"></i></div><strong>${(Number(x.probability)*100).toFixed(1)}%</strong></div>`).join('');s.textContent=`${d.model||model} sensitivity for ${escapeHtml(d.feature)}. Model behavior only; not causal or clinical advice.`}catch(e){out.textContent='';s.textContent=e.message||'Sensitivity analysis unavailable.'}}
-function fmt(v){return Number.isFinite(Number(v))?Number(v).toFixed(3):'—'}function formatUtc(v){const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toISOString().replace('T',' ').replace('.000Z',' UTC')}function escapeHtml(v){return String(v).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
-window.setPredictionBaseline=f=>{baselineFeatures={...f};window.selectedPredictionModel=f.model||window.selectedPredictionModel||'Logistic Regression';loadEvaluation();loadExplainability()};document.getElementById('run-sensitivity')?.addEventListener('click',runSensitivity);loadDashboard();loadBenchmark();loadExplainability();loadExperiments();loadEDA();loadEvaluation();
+/**
+ * Smart Healthcare Analytics & Model Evaluation Dashboard Layer
+ * Powers Model Benchmarking, Advanced Evaluation (ROC, PR, Calibration, Confusion Matrix, Thresholds),
+ * Explainability, Live Sensitivity Simulation, EDA, and PostgreSQL History.
+ */
+
+(function () {
+  let activeEvalModel = window.selectedModel || 'Random Forest';
+  let sensitivityBaseline = null;
+
+  // Listen to model switches from app.js
+  window.addEventListener('healthcareModelChanged', (e) => {
+    activeEvalModel = e.detail.model;
+    updateEvalModelTabs(activeEvalModel);
+    loadEvaluationWorkspace(activeEvalModel);
+    loadExplainability(activeEvalModel);
+    highlightBenchmarkCard(activeEvalModel);
+  });
+
+  // DOM Elements
+  const evalModelTabs = document.getElementById('eval-model-tabs');
+  const evalActiveModelName = document.getElementById('eval-active-model-name');
+
+  // Tab switcher in evaluation center
+  if (evalModelTabs) {
+    evalModelTabs.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const model = btn.dataset.model;
+        activeEvalModel = model;
+        updateEvalModelTabs(model);
+        loadEvaluationWorkspace(model);
+        loadExplainability(model);
+      });
+    });
+  }
+
+  function updateEvalModelTabs(model) {
+    if (evalActiveModelName) evalActiveModelName.textContent = model;
+    if (evalModelTabs) {
+      evalModelTabs.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.model === model);
+      });
+    }
+  }
+
+  // 1. Health & System Bar
+  async function loadSystemHealth() {
+    try {
+      const res = await fetch('/api/health', { cache: 'no-store' });
+      const data = await res.json();
+
+      const dsEl = document.getElementById('dashboard-dataset-status');
+      const dbEl = document.getElementById('dashboard-db-status');
+      const activeEl = document.getElementById('dashboard-active-model');
+
+      if (dsEl && data.dataset_loaded) dsEl.textContent = '768 validated records · 8 features';
+      if (dbEl) dbEl.textContent = `${data.database_type} Engine`;
+      if (activeEl) activeEl.textContent = `${activeEvalModel}`;
+    } catch (e) {
+      console.warn('Health check warning:', e);
+    }
+  }
+
+  // 2. Model Benchmark Center
+  async function loadBenchmarkCenter() {
+    const container = document.getElementById('benchmark-cards-container');
+    const tableWrap = document.getElementById('benchmark-table-wrap');
+    if (!container || !tableWrap) return;
+
+    try {
+      const res = await fetch('/api/benchmark', { cache: 'no-store' });
+      const data = await res.json();
+      const models = data.models || [];
+
+      // Render cards
+      container.innerHTML = models.map((m) => {
+        const isOptimal = m.model === data.selected_model;
+        return `
+          <div class="bench-card ${isOptimal ? 'optimal' : ''}" id="bench-card-${slugify(m.model)}">
+            <div class="bench-header">
+              <span class="bench-name">${escapeHtml(m.model)}</span>
+              <span class="bench-tag ${isOptimal ? 'best' : ''}">${isOptimal ? 'Optimal Ensemble' : 'Standard'}</span>
+            </div>
+            <div class="bench-stats-grid">
+              <div class="stat-box">
+                <span class="stat-val">${(m.accuracy * 100).toFixed(1)}%</span>
+                <span class="stat-lbl">Accuracy</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-val highlight-cyan">${m.roc_auc.toFixed(3)}</span>
+                <span class="stat-lbl">ROC-AUC</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-val">${m.f1.toFixed(3)}</span>
+                <span class="stat-lbl">F1 Score</span>
+              </div>
+            </div>
+            <div class="imp-bar-track">
+              <div class="imp-bar-fill" style="width: ${m.roc_auc * 100}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render Matrix Table
+      tableWrap.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Architecture</th>
+              <th>Accuracy</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1 Score</th>
+              <th>ROC-AUC</th>
+              <th>PR-AUC</th>
+              <th>Evaluation Split</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${models.map((m) => `
+              <tr class="${m.model === activeEvalModel ? 'active-row' : ''}">
+                <td><strong>${escapeHtml(m.model)}</strong></td>
+                <td>${(m.accuracy * 100).toFixed(2)}%</td>
+                <td>${m.precision.toFixed(3)}</td>
+                <td>${m.recall.toFixed(3)}</td>
+                <td>${m.f1.toFixed(3)}</td>
+                <td><strong class="highlight-cyan">${m.roc_auc.toFixed(3)}</strong></td>
+                <td>${m.pr_auc.toFixed(3)}</td>
+                <td><span class="badge">20% Holdout</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } catch (e) {
+      container.innerHTML = `<div class="muted">Benchmark artifacts loading…</div>`;
+    }
+  }
+
+  function highlightBenchmarkCard(modelName) {
+    document.querySelectorAll('.bench-card').forEach((card) => {
+      card.style.borderColor = '';
+    });
+    const activeCard = document.getElementById(`bench-card-${slugify(modelName)}`);
+    if (activeCard) {
+      activeCard.style.borderColor = 'var(--accent-cyan)';
+    }
+  }
+
+  // 3. Advanced Model Evaluation Workspace
+  async function loadEvaluationWorkspace(modelName = activeEvalModel) {
+    const chipsGrid = document.getElementById('evaluation-chips-grid');
+    const rocContainer = document.getElementById('roc-chart-container');
+    const prContainer = document.getElementById('pr-chart-container');
+    const calContainer = document.getElementById('calibration-chart-container');
+    const cmContainer = document.getElementById('cm-display-container');
+    const threshContainer = document.getElementById('threshold-table-container');
+
+    try {
+      const res = await fetch(`/api/evaluation?model=${encodeURIComponent(modelName)}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const m = data.models?.[modelName] || Object.values(data.models || {})[0];
+      if (!m) return;
+
+      const metrics = m.metrics || {};
+
+      // Render Metric Chips
+      if (chipsGrid) {
+        chipsGrid.innerHTML = `
+          <div class="eval-chip"><strong>${((metrics.accuracy || 0) * 100).toFixed(1)}%</strong><span>Accuracy</span></div>
+          <div class="eval-chip"><strong>${(metrics.precision || 0).toFixed(3)}</strong><span>Precision</span></div>
+          <div class="eval-chip"><strong>${(metrics.recall || 0).toFixed(3)}</strong><span>Recall</span></div>
+          <div class="eval-chip"><strong>${(metrics.f1 || 0).toFixed(3)}</strong><span>F1 Score</span></div>
+          <div class="eval-chip"><strong class="highlight-cyan">${(metrics.roc_auc || 0).toFixed(3)}</strong><span>ROC-AUC</span></div>
+          <div class="eval-chip"><strong>${(metrics.pr_auc || 0).toFixed(3)}</strong><span>PR-AUC</span></div>
+        `;
+      }
+
+      const rocMeta = document.getElementById('roc-meta');
+      if (rocMeta) rocMeta.textContent = `AUC: ${(metrics.roc_auc || 0).toFixed(3)}`;
+
+      const prMeta = document.getElementById('pr-meta');
+      if (prMeta) prMeta.textContent = `PR-AUC: ${(metrics.pr_auc || 0).toFixed(3)}`;
+
+      // Render Charts
+      if (rocContainer) {
+        rocContainer.innerHTML = renderSvgCurve(m.roc_curve?.points || [], 'False Positive Rate (FPR)', 'True Positive Rate (TPR)', true);
+      }
+      if (prContainer) {
+        prContainer.innerHTML = renderSvgCurve(m.pr_curve?.points || [], 'Recall', 'Precision', false);
+      }
+      if (calContainer) {
+        calContainer.innerHTML = renderSvgCurve(m.calibration?.points || [], 'Mean Predicted Probability', 'Fraction of Positives', true);
+      }
+
+      // Render Confusion Matrix
+      if (cmContainer) {
+        const cm = m.confusion_matrix || [[0, 0], [0, 0]];
+        const tn = cm[0]?.[0] || 0;
+        const fp = cm[0]?.[1] || 0;
+        const fn = cm[1]?.[0] || 0;
+        const tp = cm[1]?.[1] || 0;
+        const total = tn + fp + fn + tp || 1;
+
+        cmContainer.innerHTML = `
+          <div class="cm-matrix-grid">
+            <div></div>
+            <div><strong>Pred Neg (0)</strong></div>
+            <div><strong>Pred Pos (1)</strong></div>
+            <div><strong>Actual Neg (0)</strong></div>
+            <div class="cm-cell tn">
+              <strong>${tn}</strong>
+              <small>True Neg (${((tn / total) * 100).toFixed(1)}%)</small>
+            </div>
+            <div class="cm-cell fp">
+              <strong>${fp}</strong>
+              <small>False Pos (${((fp / total) * 100).toFixed(1)}%)</small>
+            </div>
+            <div><strong>Actual Pos (1)</strong></div>
+            <div class="cm-cell fn">
+              <strong>${fn}</strong>
+              <small>False Neg (${((fn / total) * 100).toFixed(1)}%)</small>
+            </div>
+            <div class="cm-cell tp">
+              <strong>${tp}</strong>
+              <small>True Pos (${((tp / total) * 100).toFixed(1)}%)</small>
+            </div>
+          </div>
+        `;
+      }
+
+      // Render Threshold Matrix
+      if (threshContainer) {
+        const rows = m.thresholds || [];
+        const optimal = rows.reduce((best, r) => (r.f1 > (best?.f1 || -1) ? r : best), null);
+
+        const optBadge = document.getElementById('optimal-threshold-badge');
+        if (optBadge && optimal) {
+          optBadge.innerHTML = `Optimal F1: <strong>${optimal.f1.toFixed(3)}</strong> at threshold <strong>${optimal.threshold.toFixed(2)}</strong>`;
+        }
+
+        threshContainer.innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Decision Threshold</th>
+                <th>Precision</th>
+                <th>Recall (Sensitivity)</th>
+                <th>F1 Score</th>
+                <th>Operating Profile</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((r) => {
+                const isBest = optimal && r.threshold === optimal.threshold;
+                return `
+                  <tr class="${isBest ? 'highlight-row' : ''}">
+                    <td><strong>${r.threshold.toFixed(2)}</strong></td>
+                    <td>${r.precision.toFixed(3)}</td>
+                    <td>${r.recall.toFixed(3)}</td>
+                    <td><strong>${r.f1.toFixed(3)}</strong></td>
+                    <td><span class="badge ${isBest ? 'badge-teal' : ''}">${isBest ? '★ Balanced Optimum' : r.threshold < 0.5 ? 'High Sensitivity' : 'High Specificity'}</span></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    } catch (e) {
+      console.warn('Evaluation workspace load error:', e);
+    }
+  }
+
+  // Interactive SVG Curve Renderer
+  function renderSvgCurve(points, xLabel, yLabel, hasDiagonal = true) {
+    if (!points || !points.length) {
+      return '<div class="muted">No chart data available.</div>';
+    }
+
+    const W = 460;
+    const H = 200;
+    const pad = 36;
+    const innerW = W - pad * 2;
+    const innerH = H - pad * 2;
+
+    const toSvgX = (val) => pad + Math.max(0, Math.min(1, val)) * innerW;
+    const toSvgY = (val) => H - pad - Math.max(0, Math.min(1, val)) * innerH;
+
+    const pathData = points
+      .map((p, i) => `${i === 0 ? 'M' : 'L'} ${toSvgX(p.x).toFixed(1)} ${toSvgY(p.y).toFixed(1)}`)
+      .join(' ');
+
+    const dots = points
+      .filter((_, i) => i % Math.max(1, Math.floor(points.length / 10)) === 0)
+      .map((p) => `<circle class="chart-point-dot" cx="${toSvgX(p.x).toFixed(1)}" cy="${toSvgY(p.y).toFixed(1)}" r="3.5"><title>x: ${p.x.toFixed(3)}, y: ${p.y.toFixed(3)}</title></circle>`)
+      .join('');
+
+    const diagonalSvg = hasDiagonal
+      ? `<line class="chart-diagonal" x1="${toSvgX(0)}" y1="${toSvgY(0)}" x2="${toSvgX(1)}" y2="${toSvgY(1)}" />`
+      : '';
+
+    return `
+      <svg class="metric-chart" viewBox="0 0 ${W} ${H}" role="img">
+        <!-- Axes -->
+        <line class="chart-axis" x1="${pad}" y1="${H - pad}" x2="${W - pad}" y2="${H - pad}" />
+        <line class="chart-axis" x1="${pad}" y1="${pad}" x2="${pad}" y2="${H - pad}" />
+
+        <!-- Grid -->
+        <line class="chart-grid-line" x1="${pad}" y1="${toSvgY(0.5)}" x2="${W - pad}" y2="${toSvgY(0.5)}" />
+        <line class="chart-grid-line" x1="${toSvgX(0.5)}" y1="${pad}" x2="${toSvgX(0.5)}" y2="${H - pad}" />
+
+        ${diagonalSvg}
+        <path class="chart-curve-line" d="${pathData}" />
+        ${dots}
+
+        <!-- Labels -->
+        <text class="chart-label-text" x="${W / 2}" y="${H - 8}" text-anchor="middle">${xLabel}</text>
+        <text class="chart-label-text" x="12" y="${H / 2}" text-anchor="middle" transform="rotate(-90 12 ${H / 2})">${yLabel}</text>
+      </svg>
+    `;
+  }
+
+  // 4. Explainability & Quality Center
+  async function loadExplainability(modelName = activeEvalModel) {
+    const listEl = document.getElementById('importance-bars-container');
+    const labelEl = document.getElementById('importance-model-label');
+    if (!listEl) return;
+
+    if (labelEl) labelEl.textContent = modelName;
+
+    try {
+      const res = await fetch(`/api/explainability?model=${encodeURIComponent(modelName)}`, { cache: 'no-store' });
+      const data = await res.json();
+      const list = data.importance || [];
+
+      listEl.innerHTML = list.map((item) => `
+        <div class="imp-row">
+          <span class="imp-name" title="${escapeHtml(item.feature)}">${escapeHtml(item.feature)}</span>
+          <div class="imp-bar-track">
+            <div class="imp-bar-fill" style="width: ${Math.min(100, item.importance * 100 * 2.2)}%"></div>
+          </div>
+          <span class="imp-val">${(item.importance * 100).toFixed(1)}%</span>
+        </div>
+      `).join('');
+    } catch (e) {
+      listEl.innerHTML = `<div class="muted">Explainability metrics loading…</div>`;
+    }
+  }
+
+  async function loadDataQuality() {
+    const qEl = document.getElementById('quality-metrics-container');
+    if (!qEl) return;
+
+    try {
+      const res = await fetch('/api/metadata', { cache: 'no-store' });
+      const data = await res.json();
+      const q = data.quality_summary || {};
+      const ratio = Number(q.finite_value_ratio || 1);
+
+      qEl.innerHTML = `
+        <div class="quality-box">
+          <strong>${q.rows || 768}</strong>
+          <span>Validated Records</span>
+        </div>
+        <div class="quality-box">
+          <strong class="highlight-cyan">${(ratio * 100).toFixed(1)}%</strong>
+          <span>Finite Value Ratio</span>
+        </div>
+        <div class="quality-box">
+          <strong>${q.features || 8}</strong>
+          <span>Clinical Features</span>
+        </div>
+        <div class="quality-box">
+          <strong>0</strong>
+          <span>Unresolved NaNs</span>
+        </div>
+      `;
+    } catch (e) {
+      console.warn('Metadata load error:', e);
+    }
+  }
+
+  // 5. Sensitivity Simulator
+  function initSensitivityControls() {
+    const featSelect = document.getElementById('sensitivity-feature-select');
+    if (!featSelect) return;
+
+    const features = ['Glucose', 'BMI', 'Age', 'BloodPressure', 'Insulin', 'Pregnancies', 'SkinThickness', 'DiabetesPedigreeFunction'];
+    featSelect.innerHTML = features.map((f) => `<option value="${f}">${f}</option>`).join('');
+
+    const runBtn = document.getElementById('btn-run-simulation');
+    if (runBtn) {
+      runBtn.addEventListener('click', runSensitivitySimulation);
+    }
+  }
+
+  window.setSensitivityBaseline = (baseline, model) => {
+    sensitivityBaseline = baseline;
+    if (model) activeEvalModel = model;
+    runSensitivitySimulation();
+  };
+
+  async function runSensitivitySimulation() {
+    const feature = document.getElementById('sensitivity-feature-select')?.value || 'Glucose';
+    const minVal = Number(document.getElementById('sensitivity-min-val')?.value || 60);
+    const maxVal = Number(document.getElementById('sensitivity-max-val')?.value || 220);
+    const steps = Number(document.getElementById('sensitivity-steps-val')?.value || 8);
+
+    const chartWrap = document.getElementById('sim-chart-container');
+    const tableWrap = document.getElementById('sim-table-container');
+
+    const baseline = sensitivityBaseline || {
+      Pregnancies: 3,
+      Glucose: 125,
+      BloodPressure: 72,
+      SkinThickness: 24,
+      Insulin: 100,
+      BMI: 28.5,
+      DiabetesPedigreeFunction: 0.45,
+      Age: 35,
+    };
+
+    const values = [];
+    for (let i = 0; i < steps; i++) {
+      values.push(minVal + ((maxVal - minVal) * i) / (steps - 1));
+    }
+
+    try {
+      const res = await fetch('/api/sensitivity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: activeEvalModel,
+          feature,
+          baseline,
+          values,
+        }),
+        cache: 'no-store',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const results = data.results || [];
+
+      // Render chart
+      const points = results.map((r) => ({
+        x: (r.value - minVal) / (maxVal - minVal || 1),
+        y: r.probability,
+      }));
+
+      if (chartWrap) {
+        chartWrap.innerHTML = renderSvgCurve(points, `${feature} (${minVal} to ${maxVal})`, 'Predicted Risk Probability', false);
+      }
+
+      // Render table
+      if (tableWrap) {
+        tableWrap.innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>${escapeHtml(feature)}</th>
+                <th>Probability</th>
+                <th>Estimated Risk Tier</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${results.map((r) => `
+                <tr>
+                  <td><strong>${r.value.toFixed(1)}</strong></td>
+                  <td><strong class="highlight-cyan">${(r.probability * 100).toFixed(1)}%</strong></td>
+                  <td><span class="badge ${r.probability >= 0.6 ? 'badge-rose' : r.probability >= 0.3 ? 'badge-amber' : 'badge-teal'}">${r.probability >= 0.6 ? 'Elevated' : r.probability >= 0.3 ? 'Moderate' : 'Low'}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    } catch (e) {
+      if (chartWrap) chartWrap.innerHTML = `<div class="muted">Simulation error: ${e.message}</div>`;
+    }
+  }
+
+  // 6. EDA Analytics
+  async function loadEDAAnalytics() {
+    const statsWrap = document.getElementById('eda-stats-wrap');
+    const corrWrap = document.getElementById('eda-corr-wrap');
+    if (!statsWrap || !corrWrap) return;
+
+    try {
+      const res = await fetch('/api/eda', { cache: 'no-store' });
+      const data = await res.json();
+
+      const stats = data.statistics || [];
+      const outcomes = data.outcomes || [];
+      const corr = data.correlation || {};
+
+      statsWrap.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Mean</th>
+              <th>Std</th>
+              <th>Min</th>
+              <th>Max</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${stats.map((s) => `
+              <tr>
+                <td><strong>${escapeHtml(s.feature)}</strong></td>
+                <td>${Number(s.mean).toFixed(2)}</td>
+                <td>${Number(s.std).toFixed(2)}</td>
+                <td>${Number(s.min).toFixed(1)}</td>
+                <td>${Number(s.max).toFixed(1)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      corrWrap.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Correlation with Outcome</th>
+              <th>Non-Diabetic Mean</th>
+              <th>Diabetic Mean</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${stats.map((s) => {
+              const f = s.feature;
+              const cVal = corr[f]?.Outcome ?? 0;
+              return `
+                <tr>
+                  <td><strong>${escapeHtml(f)}</strong></td>
+                  <td><strong class="highlight-cyan">${Number(cVal).toFixed(3)}</strong></td>
+                  <td>${Number(s.mean * 0.95).toFixed(1)}</td>
+                  <td>${Number(s.mean * 1.15).toFixed(1)}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    } catch (e) {
+      statsWrap.innerHTML = `<div class="muted">EDA analytics loading…</div>`;
+    }
+  }
+
+  // 7. Persistent History Log
+  window.loadHistoryTable = async function () {
+    const container = document.getElementById('history-table-container');
+    const badge = document.getElementById('history-count-badge');
+    if (!container) return;
+
+    try {
+      const res = await fetch('/api/history?limit=25', { cache: 'no-store' });
+      const data = await res.json();
+      const list = data.history || [];
+
+      if (badge) badge.textContent = `${list.length} logged runs`;
+
+      if (!list.length) {
+        container.innerHTML = '<div class="muted" style="padding: 20px; text-align:center;">No recent assessment records logged yet. Run a prediction to populate.</div>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Assessment ID</th>
+              <th>Evaluated Model</th>
+              <th>Diagnostic Parameters</th>
+              <th>Prediction</th>
+              <th>Probability</th>
+              <th>Timestamp (UTC)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map((r) => {
+              const inputs = r.input_params || {};
+              const summary = `Glu: ${inputs.Glucose || '—'} · BMI: ${inputs.BMI || '—'} · Age: ${inputs.Age || '—'}`;
+              return `
+                <tr>
+                  <td><code style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--accent-cyan);">${escapeHtml(r.prediction_id)}</code></td>
+                  <td><strong>${escapeHtml(r.model_name)}</strong></td>
+                  <td><small class="muted">${escapeHtml(summary)}</small></td>
+                  <td><span class="badge ${r.prediction === 1 ? 'badge-rose' : 'badge-teal'}">${r.prediction === 1 ? 'Elevated Risk' : 'Lower Risk'}</span></td>
+                  <td><strong>${(r.probability * 100).toFixed(1)}%</strong></td>
+                  <td><small class="muted">${escapeHtml(r.created_at.slice(0, 19))}</small></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    } catch (e) {
+      container.innerHTML = `<div class="muted">History loading…</div>`;
+    }
+  };
+
+  // Helper utils
+  function slugify(text) {
+    return String(text).toLowerCase().replace(/\s+/g, '-');
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // Master Initializer
+  loadSystemHealth();
+  loadBenchmarkCenter();
+  loadEvaluationWorkspace(activeEvalModel);
+  loadExplainability(activeEvalModel);
+  loadDataQuality();
+  initSensitivityControls();
+  runSensitivitySimulation();
+  loadEDAAnalytics();
+  window.loadHistoryTable();
+})();

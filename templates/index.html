@@ -1,26 +1,492 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Smart Healthcare AI clinical intelligence and diabetes risk prediction platform">
-  <title>Smart Healthcare | AI Clinical Intelligence</title>
-  <link rel="stylesheet" href="/static/style.css?v=6c547183"><link rel="stylesheet" href="/static/3d-healthcare.css?v=6c547183"><link rel="stylesheet" href="/static/model-selector.css?v=5988f28a">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Smart Healthcare System — AI-Driven Clinical Decision Support & Disease Risk Analysis">
+  <title>Smart Healthcare | 3D Clinical Intelligence & Disease Prediction</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheets with Cache Busting -->
+  <link rel="stylesheet" href="/static/style.css?v=2026.2.1">
+  <link rel="stylesheet" href="/static/3d-healthcare.css?v=2026.2.1">
 </head>
-<body>
-<main class="shell">
-<header class="hero hero-3d" id="top">
-  <div class="hero-copy"><p class="eyebrow">SMART HEALTHCARE · AI CLINICAL INTELLIGENCE</p><h1>Predict with<br><span>intelligence.</span></h1><p class="subtitle">A data-driven diabetes risk analysis workspace where validated health parameters meet reproducible machine learning.</p><div class="hero-actions"><a class="hero-cta" href="#prediction">Start risk assessment <span>→</span></a><span class="hero-note"><i></i> PIMA dataset · educational research</span></div></div>
-  <div class="health-orb" aria-label="Interactive healthcare AI visualization"><div class="orb-halo"></div><div class="orb-grid"></div><div class="orb-core"><div class="pulse-ring"></div><div class="heart-mark">✚</div><small>AI HEALTH</small></div><div class="orbit orbit-one"><span class="data-node node-glucose">GLUCOSE <b>↗</b></span><span class="data-node node-bmi">BMI <b>↗</b></span></div><div class="orbit orbit-two"><span class="data-node node-bp">BP <b>↗</b></span><span class="data-node node-age">AGE <b>↗</b></span></div><div class="orbit orbit-three"><span class="data-node node-insulin">INSULIN <b>↗</b></span></div><div class="scan-line"></div></div>
-</header>
-<section class="stats card glass-stats"><div><span>Dataset status</span><strong id="dashboard-status">Loading validated dataset…</strong></div><div id="target-stats" class="target-stats"></div></section>
-<section class="grid" id="prediction"><form id="prediction-form" class="card prediction-card"><div class="card-heading"><span class="section-kicker">01 · CLINICAL INPUT</span><h2>Risk assessment</h2><p>Enter patient parameters within the validated research ranges.</p></div><div id="fields" class="form-grid"></div><button type="submit" id="predict-button">Run AI assessment <span>↗</span></button><p id="form-error" class="error" role="alert"></p></form><section class="card result-card result-stage" aria-live="polite"><div class="card-heading"><span class="section-kicker">02 · MODEL INTELLIGENCE</span><h2>Prediction signal</h2><p>Educational prediction, not medical diagnosis.</p></div><div class="signal-ring"><div id="result" class="result empty">Complete the assessment to generate a prediction.</div></div><div class="notice">Use this system for Data Science demonstration only. Consult a qualified healthcare professional for medical decisions.</div></section></section>
-<section class="card benchmark-card"><div class="card-heading"><span class="section-kicker">03 · MODEL LAB</span><h2>Model Benchmark Center</h2><p>Compare Logistic Regression, Decision Tree and Random Forest using verified artifacts.</p></div><div id="benchmark-status" class="muted">Loading benchmark…</div><div id="benchmark-table" class="benchmark-table"></div></section>
-<section class="advanced-grid"><section class="card"><div class="card-heading"><span class="section-kicker">04 · EXPLAINABLE AI</span><h2>Explainability Center</h2><p>Understand which validated features influence model behavior.</p></div><div id="explainability-status" class="muted">Loading verified explainability…</div><div id="importance-list" class="importance-list"></div></section><section class="card"><div class="card-heading"><span class="section-kicker">DATA TRUST</span><h2>Data Quality</h2><p>Validated dataset integrity and coverage.</p></div><div id="quality-details" class="quality-details"><span>Waiting for dataset analytics…</span></div></section></section>
-<section class="card analytics-card"><div class="card-heading"><div><span class="section-kicker">05 · DATA INTELLIGENCE</span><h2>EDA & Analytics Center</h2><p>Descriptive statistics, class balance, feature-outcome patterns and correlation analysis.</p></div><a class="button-link" href="/api/report">Download report</a></div><div id="eda-status" class="muted">Loading EDA…</div><div class="eda-grid"><div><h3>Outcome distribution</h3><div id="eda-outcomes" class="mini-table"></div></div><div><h3>Feature statistics</h3><div id="eda-statistics" class="mini-table"></div></div><div><h3>Feature ↔ outcome correlation</h3><div id="eda-correlation" class="mini-table"></div></div><div><h3>Mean feature values by outcome</h3><div id="eda-grouped" class="mini-table"></div></div></div></section>
-<section class="card evaluation-card"><div class="card-heading"><div><span class="section-kicker">06 · VALIDATION</span><h2>Advanced Model Evaluation</h2><p>Evidence from the fixed stratified test split: ROC-AUC, PR-AUC, confusion matrix, calibration and threshold trade-offs.</p></div><span class="badge">Reproducible</span></div><div id="evaluation-status" class="muted">Loading evaluation artifacts…</div><div id="evaluation-summary" class="eval-summary"></div><div class="evaluation-grid"><div><h3>Selected model confusion matrix</h3><div id="confusion-matrix" class="confusion"></div></div><div><h3>Threshold analysis</h3><div id="threshold-table" class="mini-table"></div></div><div><h3>ROC curve points</h3><div id="roc-points" class="mini-table"></div></div><div><h3>Calibration</h3><div id="calibration-points" class="mini-table"></div></div></div></section>
-<section class="card sensitivity-card"><div class="card-heading"><span class="section-kicker">07 · WHAT-IF ENGINE</span><h2>Model Sensitivity Simulator</h2><p>Explore how one input changes model behavior. Not causal or clinical advice.</p></div><div class="sensitivity-controls"><label for="sensitivity-feature">Feature<select id="sensitivity-feature"></select></label><label for="sensitivity-start">Start<input id="sensitivity-start" type="number" step="any"></label><label for="sensitivity-end">End<input id="sensitivity-end" type="number" step="any"></label><label for="sensitivity-steps">Steps<input id="sensitivity-steps" type="number" min="2" max="25" value="6"></label><button type="button" id="run-sensitivity">Simulate response <span>↗</span></button></div><div id="sensitivity-status" class="muted">Enter a baseline prediction first.</div><div id="sensitivity-results" class="sensitivity-results"></div></section>
-<section class="card experiment-card"><div class="card-heading"><span class="section-kicker">08 · RESEARCH LAB</span><h2>Experiment Lab</h2><p>Reproducible records for in-scope machine-learning experiments.</p></div><div id="experiment-status" class="muted">Loading experiment history…</div><div id="experiment-table" class="experiment-table"></div></section>
-<section class="card responsible"><div class="card-heading"><span class="section-kicker">09 · RESPONSIBLE AI</span><h2>Responsible AI & Limitations</h2><p>Transparent interpretation of this educational healthcare ML system.</p></div><ul><li>The PIMA dataset is historical and limited to the population represented by its source; generalization to other populations is not guaranteed.</li><li>A model probability is not a diagnosis, prognosis, treatment recommendation, or causal estimate.</li><li>Feature importance describes model behavior and must not be interpreted as medical causation.</li><li>Results depend on data quality, preprocessing, model version and evaluation design.</li></ul></section>
-<footer class="footer">Smart Healthcare · AI/Data Science project · Mohd Rehan · 25SCS1003003208</footer>
-</main><script src="/static/app.js?v=b211ecf5"></script><script src="/static/dashboard.js?v=d05d913f"></script><script src="/static/3d-healthcare.js?v=6c547183"></script>
-</body></html>
+<body class="dark-theme">
+
+  <!-- Top Command Center Navigation Bar -->
+  <header class="command-bar">
+    <div class="command-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <span class="pulse-dot"></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Smart Healthcare</span>
+          <span class="brand-badge">Clinical AI 2026</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#assessment" class="nav-link active">Risk Assessment</a>
+        <a href="#benchmark" class="nav-link">Model Benchmark</a>
+        <a href="#evaluation" class="nav-link">Evaluation Center</a>
+        <a href="#explainability" class="nav-link">Explainability</a>
+        <a href="#sensitivity" class="nav-link">What-If Simulator</a>
+        <a href="#eda" class="nav-link">EDA Intelligence</a>
+        <a href="#history" class="nav-link">History</a>
+      </nav>
+
+      <div class="system-status-pill">
+        <span class="status-indicator live" id="live-indicator"></span>
+        <span class="status-label" id="system-status-text">System Live</span>
+        <span class="latency-badge" id="latency-tag">-- ms</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    
+    <!-- Hero Section with 3D Medical AI Core -->
+    <section class="hero hero-3d" id="top">
+      <div class="hero-content">
+        <div class="hero-kicker">
+          <span class="kicker-tag">DECISION SUPPORT PLATFORM</span>
+          <span class="kicker-sub">PIMA Indians Diabetes Cohort · Reproducible ML</span>
+        </div>
+        <h1 class="hero-title">
+          Predict. Understand.<br>
+          <span class="gradient-text">Prevent.</span>
+        </h1>
+        <p class="hero-subtitle">
+          An AI-powered clinical intelligence workspace for early diabetes risk estimation. 
+          Bridging validated biometric parameters with transparent, multi-model machine learning.
+        </p>
+        <div class="hero-actions">
+          <a href="#assessment" class="btn btn-primary btn-glow">
+            <span>Start Risk Assessment</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#benchmark" class="btn btn-secondary">
+            <span>Explore Models</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+        </div>
+        
+        <div class="hero-metrics-strip">
+          <div class="metric-item">
+            <strong id="hero-model-count">3 Validated Models</strong>
+            <span>Logistic, Tree, Forest</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <strong id="hero-dataset-rows">768 Verified Records</strong>
+            <span>PIMA Research Cohort</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <strong id="hero-best-auc">0.822 ROC-AUC</strong>
+            <span>Optimal Ensemble Spec</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Medical Visualization Core -->
+      <div class="health-orb-container" aria-label="Interactive 3D Healthcare Visualization">
+        <div class="health-orb" id="threejs-canvas-host">
+          <canvas id="medical-ai-canvas" width="500" height="500"></canvas>
+          <div class="orb-fallback-nodes">
+            <div class="floating-node node-glucose" data-param="Glucose">
+              <span class="node-icon">⚡</span>
+              <div class="node-meta"><b>Glucose</b><small>148 mg/dL</small></div>
+            </div>
+            <div class="floating-node node-bmi" data-param="BMI">
+              <span class="node-icon">⚖️</span>
+              <div class="node-meta"><b>BMI</b><small>33.6 kg/m²</small></div>
+            </div>
+            <div class="floating-node node-bp" data-param="BloodPressure">
+              <span class="node-icon">❤️</span>
+              <div class="node-meta"><b>Blood Press.</b><small>72 mm Hg</small></div>
+            </div>
+            <div class="floating-node node-insulin" data-param="Insulin">
+              <span class="node-icon">💉</span>
+              <div class="node-meta"><b>Insulin</b><small>160 μU/mL</small></div>
+            </div>
+            <div class="floating-node node-age" data-param="Age">
+              <span class="node-icon">🧬</span>
+              <div class="node-meta"><b>Age</b><small>50 yrs</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- System & Data Health Strip -->
+    <section class="card glass-card system-bar">
+      <div class="system-item">
+        <span class="lbl">Dataset Integrity</span>
+        <strong id="dashboard-dataset-status">768 validated records · 8 features</strong>
+      </div>
+      <div class="system-item">
+        <span class="lbl">Active Model</span>
+        <strong id="dashboard-active-model" class="highlight-cyan">Random Forest (Ensemble)</strong>
+      </div>
+      <div class="system-item">
+        <span class="lbl">Database Engine</span>
+        <strong id="dashboard-db-status">PostgreSQL Persistent</strong>
+      </div>
+      <div class="system-item">
+        <span class="lbl">Class Split</span>
+        <strong id="dashboard-class-split">500 Neg (65.1%) / 268 Pos (34.9%)</strong>
+      </div>
+    </section>
+
+    <!-- SECTION 1: Clinical Risk Assessment Console -->
+    <section class="section-container" id="assessment">
+      <div class="section-header">
+        <div class="section-kicker">01 · PATIENT ASSESSMENT WORKSPACE</div>
+        <h2>Clinical Risk Prediction Console</h2>
+        <p>Input patient diagnostic measurements or select a clinical reference persona to evaluate risk with the authoritative backend models.</p>
+      </div>
+
+      <div class="assessment-grid">
+        <!-- Input Form Card -->
+        <div class="card glass-card form-card">
+          <div class="model-select-header">
+            <span class="form-subheading">Select Predictive Model</span>
+            <div class="model-pill-group" role="radiogroup" aria-label="Model Selection" id="model-selector-pills">
+              <button type="button" class="model-pill" data-model="Logistic Regression">Logistic Reg.</button>
+              <button type="button" class="model-pill" data-model="Decision Tree">Decision Tree</button>
+              <button type="button" class="model-pill active" data-model="Random Forest">Random Forest</button>
+            </div>
+          </div>
+
+          <!-- Preset Personas -->
+          <div class="personas-strip">
+            <span class="persona-label">Clinical Presets:</span>
+            <button type="button" class="preset-btn" data-preset="low">Low Risk</button>
+            <button type="button" class="preset-btn" data-preset="borderline">Borderline</button>
+            <button type="button" class="preset-btn" data-preset="elevated">Elevated Risk</button>
+            <button type="button" class="preset-btn" data-preset="reset">Clear</button>
+          </div>
+
+          <form id="prediction-form" novalidate>
+            <div class="form-grid" id="fields">
+              <!-- Fields dynamically generated or loaded with strict validation -->
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" id="predict-button" class="btn btn-primary btn-block">
+                <span>Evaluate Patient Risk</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </button>
+            </div>
+            <p id="form-error" class="form-error" role="alert"></p>
+          </form>
+        </div>
+
+        <!-- Result Signal Card with 3D Biometric Ring -->
+        <div class="card glass-card result-card" id="result-display-stage">
+          <div class="result-card-header">
+            <span class="form-subheading">Model Assessment Signal</span>
+            <span class="badge" id="evaluated-model-tag">Random Forest</span>
+          </div>
+
+          <div class="biometric-signal-stage">
+            <div class="biometric-ring-wrap">
+              <svg class="biometric-svg" viewBox="0 0 220 220">
+                <circle class="ring-bg" cx="110" cy="110" r="90"></circle>
+                <circle class="ring-fill" id="risk-ring-fill" cx="110" cy="110" r="90" stroke-dasharray="565.48" stroke-dashoffset="565.48"></circle>
+              </svg>
+              <div class="ring-center-content">
+                <span class="risk-score-value" id="risk-score-value">--%</span>
+                <span class="risk-score-sub" id="risk-score-label">Awaiting Input</span>
+              </div>
+            </div>
+
+            <div class="risk-tier-badge" id="risk-tier-badge">
+              <span class="tier-dot"></span>
+              <span id="risk-tier-text">Ready for Assessment</span>
+            </div>
+
+            <div class="risk-factors-panel" id="risk-factors-panel">
+              <span class="panel-title">Diagnostic Key Drivers:</span>
+              <ul class="factors-list" id="factors-list">
+                <li class="muted">Enter patient measurements to view clinical risk factors.</li>
+              </ul>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="export-actions">
+              <button type="button" class="btn btn-outline" id="btn-export-pdf">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Export Clinical Dossier (PDF)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Model Benchmark Center -->
+    <section class="section-container" id="benchmark">
+      <div class="section-header">
+        <div class="section-kicker">02 · MODEL COMPARISON</div>
+        <h2>Model Benchmark Center</h2>
+        <p>Side-by-side performance evaluation of all 3 classification architectures on the 20% stratified holdout test split.</p>
+      </div>
+
+      <div class="benchmark-cards-grid" id="benchmark-cards-container">
+        <!-- Rendered by JS from real backend metrics -->
+      </div>
+
+      <div class="card glass-card table-card">
+        <div class="table-header">
+          <h3>Authoritative Performance Matrix</h3>
+          <div class="table-actions">
+            <a href="/api/export/csv" class="btn btn-sm btn-outline">Download CSV</a>
+            <a href="/api/export/json" class="btn btn-sm btn-outline">Download JSON</a>
+          </div>
+        </div>
+        <div class="table-responsive" id="benchmark-table-wrap">
+          <!-- Loaded via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Advanced Model Evaluation Workspace -->
+    <section class="section-container" id="evaluation">
+      <div class="section-header">
+        <div class="section-kicker">03 · STATISTICAL EVIDENCE</div>
+        <h2>Advanced Model Evaluation Workspace</h2>
+        <p>Comprehensive statistical diagnostic charts derived from canonical test predictions across all threshold points.</p>
+      </div>
+
+      <!-- Evaluation Model Selector Sub-Bar -->
+      <div class="eval-control-bar card glass-card">
+        <div class="eval-control-label">
+          <span>Active Evaluation Model:</span>
+          <strong id="eval-active-model-name">Random Forest</strong>
+        </div>
+        <div class="eval-model-tabs" id="eval-model-tabs">
+          <button type="button" class="tab-btn" data-model="Logistic Regression">Logistic Regression</button>
+          <button type="button" class="tab-btn" data-model="Decision Tree">Decision Tree</button>
+          <button type="button" class="tab-btn active" data-model="Random Forest">Random Forest</button>
+        </div>
+      </div>
+
+      <!-- Evaluation Metric Chips -->
+      <div class="eval-chips-grid" id="evaluation-chips-grid">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Advanced Charts Grid (ROC, PR, Calibration, Confusion Matrix) -->
+      <div class="charts-grid-2x2">
+        <div class="card glass-card chart-card">
+          <div class="chart-header">
+            <h4>Receiver Operating Characteristic (ROC)</h4>
+            <span class="chart-meta" id="roc-meta">AUC: --</span>
+          </div>
+          <div class="chart-svg-container" id="roc-chart-container"></div>
+        </div>
+
+        <div class="card glass-card chart-card">
+          <div class="chart-header">
+            <h4>Precision-Recall Curve (PR-AUC)</h4>
+            <span class="chart-meta" id="pr-meta">PR-AUC: --</span>
+          </div>
+          <div class="chart-svg-container" id="pr-chart-container"></div>
+        </div>
+
+        <div class="card glass-card chart-card">
+          <div class="chart-header">
+            <h4>Reliability Calibration Curve</h4>
+            <span class="chart-meta">Quantile Binned</span>
+          </div>
+          <div class="chart-svg-container" id="calibration-chart-container"></div>
+        </div>
+
+        <div class="card glass-card chart-card">
+          <div class="chart-header">
+            <h4>Confusion Matrix (Test Split)</h4>
+            <span class="chart-meta">Threshold: 0.50</span>
+          </div>
+          <div class="cm-display-wrap" id="cm-display-container"></div>
+        </div>
+      </div>
+
+      <!-- Threshold Tradeoff Analysis -->
+      <div class="card glass-card table-card threshold-section">
+        <div class="table-header">
+          <div>
+            <h3>Threshold Decision Matrix & F1 Optimization</h3>
+            <p class="muted">Explore how precision and recall trade off across operating thresholds (0.1 to 0.9).</p>
+          </div>
+          <div class="optimal-threshold-badge" id="optimal-threshold-badge">
+            Optimal F1: <strong>--</strong> at threshold <strong>--</strong>
+          </div>
+        </div>
+        <div class="table-responsive" id="threshold-table-container"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Explainability & Data Quality -->
+    <section class="section-container" id="explainability">
+      <div class="section-header">
+        <div class="section-kicker">04 · TRANSPARENT AI</div>
+        <h2>Explainability & Data Quality Center</h2>
+        <p>Global feature importance rankings for the selected model paired with rigorous data quality audits.</p>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Feature Importance Card -->
+        <div class="card glass-card">
+          <div class="card-title-bar">
+            <h3>Global Feature Importance</h3>
+            <span class="badge" id="importance-model-label">Random Forest</span>
+          </div>
+          <p class="muted">Normalized relative importance scores of all 8 clinical parameters.</p>
+          <div class="importance-bars-list" id="importance-bars-container">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Data Quality Card -->
+        <div class="card glass-card">
+          <div class="card-title-bar">
+            <h3>Dataset Quality & Integrity</h3>
+            <span class="badge badge-teal">Verified Cohort</span>
+          </div>
+          <p class="muted">Validated PIMA dataset health, completeness, and imputation audit.</p>
+          <div class="quality-metrics-grid" id="quality-metrics-container">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Live Sensitivity / What-If Simulator -->
+    <section class="section-container" id="sensitivity">
+      <div class="section-header">
+        <div class="section-kicker">05 · SCENARIO ANALYSIS</div>
+        <h2>Live Sensitivity Simulator</h2>
+        <p>Simulate how shifts in individual diagnostic parameters (e.g. Glucose or BMI) alter predicted risk in real time.</p>
+      </div>
+
+      <div class="card glass-card simulator-card">
+        <div class="simulator-controls">
+          <div class="control-group">
+            <label for="sensitivity-feature-select">Simulated Parameter</label>
+            <select id="sensitivity-feature-select" class="form-select"></select>
+          </div>
+          <div class="control-group">
+            <label for="sensitivity-min-val">Start Value</label>
+            <input type="number" id="sensitivity-min-val" class="form-input" value="60">
+          </div>
+          <div class="control-group">
+            <label for="sensitivity-max-val">End Value</label>
+            <input type="number" id="sensitivity-max-val" class="form-input" value="220">
+          </div>
+          <div class="control-group">
+            <label for="sensitivity-steps-val">Steps</label>
+            <input type="number" id="sensitivity-steps-val" class="form-input" value="8" min="3" max="25">
+          </div>
+          <div class="control-group submit-col">
+            <button type="button" class="btn btn-primary" id="btn-run-simulation">
+              <span>Run Simulation</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="simulator-results-stage">
+          <div class="sim-chart-wrap" id="sim-chart-container"></div>
+          <div class="sim-table-wrap" id="sim-table-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: EDA & Dataset Intelligence -->
+    <section class="section-container" id="eda">
+      <div class="section-header">
+        <div class="section-kicker">06 · STATISTICAL INTELLIGENCE</div>
+        <h2>Exploratory Data Analysis (EDA)</h2>
+        <p>Descriptive statistics, feature-outcome correlation vectors, and outcome-grouped clinical averages.</p>
+      </div>
+
+      <div class="grid-2col">
+        <div class="card glass-card">
+          <h3>Summary Statistics (All Features)</h3>
+          <div class="table-responsive mini-table-wrap" id="eda-stats-wrap"></div>
+        </div>
+        <div class="card glass-card">
+          <h3>Outcome Correlation & Grouped Means</h3>
+          <div class="table-responsive mini-table-wrap" id="eda-corr-wrap"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: Assessment & Experiment History -->
+    <section class="section-container" id="history">
+      <div class="section-header">
+        <div class="section-kicker">07 · PERSISTENT AUDIT LOG</div>
+        <h2>Recent Assessment & Experiment History</h2>
+        <p>Real-time audit log of executed predictions and ML training experiments persisted to PostgreSQL.</p>
+      </div>
+
+      <div class="card glass-card table-card">
+        <div class="table-header">
+          <h3>Persistent Prediction Assessment Log</h3>
+          <span class="badge" id="history-count-badge">0 logged runs</span>
+        </div>
+        <div class="table-responsive" id="history-table-container">
+          <!-- Loaded via JS from /api/history -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Responsible AI & Clinical Governance Notice -->
+    <section class="card glass-card responsible-card">
+      <div class="responsible-header">
+        <div class="warn-icon">⚠️</div>
+        <div>
+          <h3>Responsible AI & Medical Governance</h3>
+          <p class="muted">Ethical constraints, model limitations, and clinical usage scope.</p>
+        </div>
+      </div>
+      <div class="responsible-content">
+        <ul>
+          <li><strong>Decision Support Only:</strong> This machine learning system is engineered for academic research, education, and decision support. It does not provide medical diagnosis or therapeutic prescriptions.</li>
+          <li><strong>Population Specificity:</strong> Trained on the PIMA Indians Diabetes Dataset. Generalization to demographically distinct populations requires external validation.</li>
+          <li><strong>Explainability Dynamics:</strong> Feature importance rankings reflect model mathematical weights and do not establish direct clinical causation.</li>
+          <li><strong>Always Consult Certified Clinicians:</strong> Formal healthcare decisions must be guided by certified healthcare professionals and clinical laboratory tests.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div class="footer-left">
+          <strong>Smart Healthcare System</strong>
+          <span>AI Clinical Intelligence Platform · 2026 Portfolio Edition</span>
+        </div>
+        <div class="footer-right">
+          <span>Author: <strong>MOHD REHAN</strong> (25SCS1003003208)</span>
+          <span>Institution: <strong>IILM University</strong></span>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- JavaScript Modules with Cache Busting -->
+  <script src="/static/3d-healthcare.js?v=2026.2.1"></script>
+  <script src="/static/app.js?v=2026.2.1"></script>
+  <script src="/static/dashboard.js?v=2026.2.1"></script>
+</body>
+</html>

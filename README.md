@@ -1,264 +1,155 @@
-# Smart Healthcare System for Disease Prediction
+# Smart Healthcare System for Disease Prediction (2026 Edition)
 
-A comprehensive machine learning project for predicting diabetes using the PIMA Indians Diabetes Dataset.
-
-## 📋 Project Overview
-
-This project implements a **Smart Healthcare System** that uses machine learning algorithms to predict whether a patient has diabetes based on medical diagnostic measurements. The system includes data preprocessing, exploratory data analysis (EDA), and comparison of multiple classification models.
-
-**Student:** MOHD REHAN  
-**Roll No:** 25SCS1003003208  
-**Section:** 1CSE26  
-**Submitted to:** MS. ISHU CHAUDHARY
+A portfolio-grade AI clinical decision-support and diabetes risk prediction platform featuring interactive 3D medical visualization, multi-model evaluation, global explainability, sensitivity simulation, PostgreSQL persistence, and ReportLab PDF reporting.
 
 ---
 
-## 🎯 Objectives
+## 📋 Executive Overview
 
-- Load and preprocess the PIMA Indians Diabetes Dataset
-- Perform comprehensive Exploratory Data Analysis (EDA)
-- Build and train multiple machine learning models
-- Evaluate and compare model performance
-- Generate visualizations for insights
-- Provide a production-ready healthcare prediction system
+The **Smart Healthcare System** is a data-driven web platform that enables clinicians, researchers, and users to perform early diabetes risk assessment based on the **PIMA Indians Diabetes Dataset**.
 
----
-
-## 📊 Dataset
-
-**Source:** PIMA Indians Diabetes Dataset  
-**Samples:** 768 records  
-**Features:** 8 medical diagnostic measurements  
-**Target:** Diabetes outcome (Binary: 0 = Non-Diabetic, 1 = Diabetic)
-
-### Features:
-- **Pregnancies:** Number of times pregnant
-- **Glucose:** Plasma glucose concentration
-- **BloodPressure:** Diastolic blood pressure
-- **SkinThickness:** Triceps skin fold thickness
-- **Insulin:** 2-Hour serum insulin level
-- **BMI:** Body Mass Index
-- **DiabetesPedigreeFunction:** Diabetes pedigree function
-- **Age:** Age of patient
+- **Author:** MOHD REHAN (Roll No: 25SCS1003003208 | Section: 1CSE26)
+- **Institution:** IILM University
+- **Core Purpose:** Educational ML & Clinical Decision Support (Non-diagnostic)
 
 ---
 
-## 🏗️ Project Structure
+## ✨ Key Capabilities & Architectural Highlights
+
+1. **3D Medical AI Visualization**:
+   - Interactive 3D WebGL / Canvas medical AI core with orbital particle nodes and responsive mouse parallax tilt.
+   - Circular biometric risk ring with dynamic probability sweeps.
+
+2. **Authoritative Multi-Model Pipeline (Single Source of Truth)**:
+   - **Logistic Regression**: Interpretable linear baseline with Standard Scaler pipeline.
+   - **Decision Tree**: Non-linear tree structure with controlled depth.
+   - **Random Forest**: 300-tree ensemble with balanced class weighting (optimal ROC-AUC: `0.822`).
+
+3. **Advanced Model Evaluation Workspace**:
+   - Dynamic ROC Curves with area under curve calculations.
+   - Precision-Recall (PR) Curves with PR-AUC metric.
+   - Reliability Calibration Curves (Quantile Binned).
+   - Interactive 2×2 Confusion Matrix with True/False Positive/Negative breakdown.
+   - Threshold Decision Matrix ($0.1 \dots 0.9$) highlighting the optimal F1 threshold.
+
+4. **Global Feature Explainability & Sensitivity Simulator**:
+   - Relative feature importance rankings across all three models.
+   - Live what-if simulator testing parameter sensitivity held against patient baselines.
+
+5. **PostgreSQL Persistence & Idempotent Migrations**:
+   - Production PostgreSQL storage for clinical assessments and training run audits.
+   - Idempotent migration engine (`scripts/migrate_db.py`) enforcing `DATABASE_URL` in production without leaking credentials.
+
+6. **Automated Clinical Dossier Reporting**:
+   - Professional PDF exports powered by **ReportLab**.
+   - Structured CSV and JSON exports consuming the canonical backend data structure.
+
+---
+
+## 🏗️ Project Architecture
 
 ```
 smart-healthcare-disease-prediction-system/
-├── smart_healthcare.py          # Main project script
-├── requirements.txt              # Python dependencies
-├── .gitignore                    # Git ignore rules
-├── README.md                     # This file
+├── app.py                           # Flask backend & canonical API endpoints
+├── requirements.txt                 # Pinned dependencies (pandas, numpy, scikit-learn, joblib)
+├── render.yaml                      # Render Blueprint specification
+├── .python-version                  # Pinned Python runtime (3.11.11)
+├── .gitignore                       # Git ignore rules
+├── README.md                        # Documentation
 ├── data/
-│   └── PIMA_Diabetes_Dataset.xlsx # Input dataset
-├── outputs/                      # Generated visualizations
-│   ├── fig1_distributions.png
-│   ├── fig2_heatmap.png
-│   ├── fig3_class_boxplots.png
-│   ├── fig4_pairplot.png
-│   ├── fig5_confusion_matrices.png
-│   ├── fig6_roc_curves.png
-│   ├── fig7_model_comparison.png
-│   └── fig8_feature_importance.png
-└── models/                       # Trained models (optional)
+│   ├── PIMA_Diabetes_Dataset.xlsx   # Canonical PIMA dataset (Excel)
+│   └── pima_diabetes.csv            # Canonical PIMA dataset (CSV)
+├── models/                          # Trained model artifacts & evaluation JSON
+│   ├── best_model.joblib
+│   ├── logistic_regression.joblib
+│   ├── decision_tree.joblib
+│   ├── random_forest.joblib
+│   ├── evaluation.json             # Canonical evaluation evidence
+│   ├── metrics.json                # Comparative benchmark metrics
+│   └── metadata.json               # Model metadata & dataset quality audit
+├── scripts/
+│   ├── migrate_db.py                # Idempotent database migration script
+│   └── train_production_model.py    # Multi-model training and evaluation generator
+├── src/
+│   ├── __init__.py
+│   ├── data_pipeline.py             # Schema validation & zero imputation
+│   ├── data_quality.py              # Data health & coverage metrics
+│   ├── eda.py                       # Exploratory analytics helpers
+│   ├── db.py                        # Database connection & persistence layer
+│   ├── prediction.py                # Input validation & risk prediction
+│   ├── explainability.py            # Global feature importance engine
+│   ├── sensitivity.py               # What-if scenario simulation engine
+│   ├── benchmark.py                 # Benchmark loader
+│   └── reporting.py                 # ReportLab PDF & export generator
+├── static/
+│   ├── style.css                    # 2026 SaaS Dark Theme & Design System
+│   ├── 3d-healthcare.css            # 3D core & biometric visualization styles
+│   ├── 3d-healthcare.js             # 3D WebGL/Canvas medical core & parallax
+│   ├── app.js                       # Prediction form & biometric signal display
+│   └── dashboard.js                 # Evaluation workspace, SVG charts & history
+└── templates/
+    └── index.html                   # Command Center UI template
 ```
 
 ---
 
-## 🔧 Installation
+## 🚀 Setup & Local Execution
 
-### Prerequisites
-- Python 3.7 or higher
-- pip package manager
-
-### Setup Steps
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/[your-username]/smart-healthcare-disease-prediction-system.git
-   cd smart-healthcare-disease-prediction-system
-   ```
-
-2. **Create a virtual environment:**
-   ```bash
-   # Windows
-   python -m venv venv
-   venv\Scripts\activate
-   
-   # macOS/Linux
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
----
-
-## 🚀 Usage
-
-Run the main project script:
-
+### 1. Clone & Environment Setup
 ```bash
-python smart_healthcare.py
+git clone https://github.com/codebyrehan/smart-healthcare-disease-prediction-system.git
+cd smart-healthcare-disease-prediction-system
+
+# Create and activate virtual environment
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-**What the script does:**
-1. Loads the PIMA Diabetes Dataset (with online/offline fallback)
-2. Performs data cleaning and preprocessing
-3. Conducts Exploratory Data Analysis
-4. Trains 3 machine learning models:
-   - Logistic Regression
-   - Decision Tree Classifier
-   - Random Forest Classifier
-5. Evaluates models using multiple metrics
-6. Generates 8 comprehensive visualizations
-7. Automatically opens all figures in your default image viewer
-
----
-
-## 📈 Models Implemented
-
-### 1. Logistic Regression
-- Linear classification model
-- Good for binary classification
-- Fast and interpretable
-
-### 2. Decision Tree Classifier
-- Tree-based model with max depth of 5
-- Handles non-linear relationships
-- Easy to visualize and interpret
-
-### 3. Random Forest Classifier
-- Ensemble model with 100 trees
-- Reduces overfitting through averaging
-- Provides feature importance rankings
-
----
-
-## 📊 Evaluation Metrics
-
-The project evaluates models using:
-
-- **Accuracy:** Percentage of correct predictions
-- **ROC-AUC Score:** Area under the ROC curve (0.5-1.0)
-- **Confusion Matrix:** True/False Positives and Negatives
-- **Classification Report:** Precision, Recall, F1-Score
-- **ROC Curves:** Visual comparison of all models
-
----
-
-## 📈 Key Findings
-
-The analysis generates visualizations for:
-
-1. **Feature Distributions** - Distribution of each feature by outcome
-2. **Correlation Heatmap** - Relationships between features
-3. **Class Distribution** - Balance of diabetic vs non-diabetic cases
-4. **Pairplot** - Interactions between key features
-5. **Confusion Matrices** - Performance breakdown for each model
-6. **ROC Curves** - Model comparison on different thresholds
-7. **Model Comparison** - Accuracy and AUC comparison
-8. **Feature Importance** - Most important features in Random Forest
-
----
-
-## 📋 Data Preprocessing Steps
-
-1. **Missing Value Handling:** Replace impossible zeros with NaN
-2. **Imputation:** Fill missing values with median
-3. **Feature Scaling:** StandardScaler normalization
-4. **Train-Test Split:** 80-20 split with stratification
-5. **Data Validation:** Ensure data quality before modeling
-
----
-
-## 🔍 Technical Stack
-
-| Technology | Purpose |
-|-----------|---------|
-| **Python** | Programming language |
-| **Pandas** | Data manipulation & analysis |
-| **NumPy** | Numerical computing |
-| **Scikit-learn** | Machine learning models |
-| **Matplotlib** | Data visualization |
-| **Seaborn** | Statistical visualization |
-| **Git** | Version control |
-
----
-
-## 📝 Results Summary
-
-The script outputs:
-- Detailed console logs for each step
-- Accuracy and AUC scores for all models
-- Classification reports with precision/recall
-- 8 professional visualizations
-- Best performing model recommendation
-
----
-
-## ⚙️ Configuration
-
-You can modify the following parameters in the script:
-
-```python
-# Model parameters
-DecisionTreeClassifier(max_depth=5, random_state=42)
-RandomForestClassifier(n_estimators=100, random_state=42)
-LogisticRegression(max_iter=1000, random_state=42)
-
-# Train-test split
-test_size=0.2, random_state=42, stratify=y
-
-# Visualization style
-plt.rcParams.update({...})
+### 2. Run Database Migrations
+```bash
+python scripts/migrate_db.py
 ```
 
----
+### 3. Train & Evaluate Models
+```bash
+python scripts/train_production_model.py
+```
 
-## 🎨 Visualizations
-
-All generated figures are automatically displayed and saved in the `outputs/` directory:
-- PNG format (150 dpi)
-- Professional styling with consistent color palette
-- High-quality for reports and presentations
-
----
-
-## 🔗 Dataset Source
-
-The PIMA Indians Diabetes Dataset is sourced from:
-- **Original:** UCI Machine Learning Repository
-- **Current URL:** GitHub raw content
-- **Fallback:** Synthetic data generation (for offline mode)
+### 4. Start Local Server
+```bash
+python app.py
+```
+Access the application at `http://127.0.0.1:5000`.
 
 ---
 
-## 📝 License
+## 🌐 Production Deployment (Render)
 
-This is a student project submitted for coursework. Feel free to use for educational purposes.
-
----
-
-## 📧 Contact
-
-**Author:** MOHD REHAN  
-**Email:** codexrehan@gmail.com  
-**Roll No:** 25SCS1003003208
-
----
-
-## 🙏 Acknowledgments
-
-- Guided by: **MS. ISHU CHAUDHARY**
-- Section: **1CSE26**
-- Institution: **IILM University Greater Noida**
+1. Connect the repository to **Render**.
+2. Select **Web Service** or use `render.yaml`.
+3. Configure the following Environment Variables in the Render dashboard:
+   - `DATABASE_URL`: Your PostgreSQL connection string.
+   - `PYTHON_VERSION`: `3.11.11`
+   - `FLASK_ENV`: `production`
+4. The build command will automatically execute:
+   ```bash
+   pip install -r requirements.txt && python scripts/migrate_db.py && python scripts/train_production_model.py
+   ```
+5. The start command will run Gunicorn:
+   ```bash
+   gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+   ```
 
 ---
 
-**Last Updated:** April 2026
+## ⚖️ Responsible AI & Ethical Scope
+
+- **Decision Support Only:** This platform is designed for academic demonstration and research. Predictions do not constitute medical diagnoses or prescriptions.
+- **Population Constraints:** Results are derived from the PIMA historical cohort and should be validated before applying to distinct demographic populations.
+- **Consult Clinicians:** All clinical decisions must be confirmed by qualified medical professionals.

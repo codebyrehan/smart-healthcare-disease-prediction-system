@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: smart-healthcare-system
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python scripts/migrate_db.py && python scripts/train_production_model.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
