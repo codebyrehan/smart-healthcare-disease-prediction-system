@@ -1,25 +1,98 @@
 /**
  * Smart Healthcare Risk Prediction Application Layer
+ * Author: Mohd Rehan (25SCS1003003208 | Section 1CSE26)
  * Manages patient inputs, clinical presets, model switching, biometric risk ring, and PDF export.
  */
 
 (function () {
   // Clinical Parameter Specifications
   const PARAM_SPECS = [
-    { name: 'Pregnancies', label: 'Pregnancies', min: 0, max: 20, step: 1, defaultVal: 1, unit: 'Count', desc: 'Number of times pregnant' },
-    { name: 'Glucose', label: 'Plasma Glucose', min: 40, max: 300, step: 1, defaultVal: 120, unit: 'mg/dL', desc: '2h oral glucose tolerance test' },
-    { name: 'BloodPressure', label: 'Diastolic BP', min: 30, max: 200, step: 1, defaultVal: 72, unit: 'mm Hg', desc: 'Diastolic blood pressure' },
-    { name: 'SkinThickness', label: 'Skinfold Thickness', min: 0, max: 100, step: 1, defaultVal: 24, unit: 'mm', desc: 'Triceps skin fold thickness' },
-    { name: 'Insulin', label: 'Serum Insulin', min: 0, max: 900, step: 1, defaultVal: 90, unit: 'μU/mL', desc: '2-Hour serum insulin' },
-    { name: 'BMI', label: 'Body Mass Index', min: 10.0, max: 70.0, step: 0.1, defaultVal: 28.5, unit: 'kg/m²', desc: 'Weight in kg/(height in m)²' },
-    { name: 'DiabetesPedigreeFunction', label: 'Diabetes Pedigree', min: 0.05, max: 3.0, step: 0.01, defaultVal: 0.38, unit: 'Score', desc: 'Genetic diabetes pedigree function' },
-    { name: 'Age', label: 'Age', min: 18, max: 120, step: 1, defaultVal: 33, unit: 'Years', desc: 'Patient age' },
+    { 
+      name: 'Pregnancies', 
+      label: 'Pregnancies', 
+      min: 0, 
+      max: 20, 
+      step: 1, 
+      defaultVal: 1, 
+      unit: 'Count', 
+      desc: 'Times pregnant (0 if male or no prior pregnancy)' 
+    },
+    { 
+      name: 'Glucose', 
+      label: 'Plasma Glucose', 
+      min: 40, 
+      max: 300, 
+      step: 1, 
+      defaultVal: 120, 
+      unit: 'mg/dL', 
+      desc: '2h oral glucose concentration test' 
+    },
+    { 
+      name: 'BloodPressure', 
+      label: 'Diastolic Blood Pressure', 
+      min: 30, 
+      max: 200, 
+      step: 1, 
+      defaultVal: 72, 
+      unit: 'mm Hg', 
+      desc: 'Diastolic blood pressure reading' 
+    },
+    { 
+      name: 'SkinThickness', 
+      label: 'Skinfold Thickness', 
+      min: 0, 
+      max: 100, 
+      step: 1, 
+      defaultVal: 24, 
+      unit: 'mm', 
+      desc: 'Triceps skin fold thickness measurement' 
+    },
+    { 
+      name: 'Insulin', 
+      label: '2-Hour Serum Insulin', 
+      min: 0, 
+      max: 900, 
+      step: 1, 
+      defaultVal: 80, 
+      unit: 'μU/mL', 
+      desc: '2-Hour post-load serum insulin level' 
+    },
+    { 
+      name: 'BMI', 
+      label: 'Body Mass Index (BMI)', 
+      min: 10.0, 
+      max: 70.0, 
+      step: 0.1, 
+      defaultVal: 28.5, 
+      unit: 'kg/m²', 
+      desc: 'Weight in kg / (Height in m)²' 
+    },
+    { 
+      name: 'DiabetesPedigreeFunction', 
+      label: 'Diabetes Pedigree Score', 
+      min: 0.05, 
+      max: 3.0, 
+      step: 0.01, 
+      defaultVal: 0.38, 
+      unit: 'Score', 
+      desc: 'Genetic diabetes risk score (0.08 - 2.42)' 
+    },
+    { 
+      name: 'Age', 
+      label: 'Patient Age', 
+      min: 18, 
+      max: 120, 
+      step: 1, 
+      defaultVal: 33, 
+      unit: 'Years', 
+      desc: 'Patient age in completed years' 
+    },
   ];
 
   // Clinical Personas
   const PRESETS = {
-    low: { Pregnancies: 1, Glucose: 88, BloodPressure: 66, SkinThickness: 20, Insulin: 60, BMI: 22.4, DiabetesPedigreeFunction: 0.24, Age: 25 },
-    borderline: { Pregnancies: 3, Glucose: 128, BloodPressure: 74, SkinThickness: 28, Insulin: 110, BMI: 29.5, DiabetesPedigreeFunction: 0.48, Age: 38 },
+    low: { Pregnancies: 0, Glucose: 88, BloodPressure: 66, SkinThickness: 20, Insulin: 60, BMI: 22.4, DiabetesPedigreeFunction: 0.24, Age: 25 },
+    borderline: { Pregnancies: 2, Glucose: 128, BloodPressure: 74, SkinThickness: 28, Insulin: 110, BMI: 29.5, DiabetesPedigreeFunction: 0.48, Age: 38 },
     elevated: { Pregnancies: 6, Glucose: 168, BloodPressure: 82, SkinThickness: 35, Insulin: 220, BMI: 36.8, DiabetesPedigreeFunction: 0.85, Age: 52 },
   };
 
@@ -43,14 +116,14 @@
   const factorsList = document.getElementById('factors-list');
   const btnExportPdf = document.getElementById('btn-export-pdf');
 
-  // Populate Input Fields
+  // Populate Input Fields with clear labels and helper text
   function initFormFields() {
     if (!fieldsContainer) return;
     fieldsContainer.innerHTML = PARAM_SPECS.map((spec) => `
       <div class="form-group">
         <label class="form-label" for="inp-${spec.name}">
-          <span>${spec.label}</span>
-          <span class="unit">${spec.unit}</span>
+          <span>${escapeHtml(spec.label)}</span>
+          <span class="unit">${escapeHtml(spec.unit)}</span>
         </label>
         <input 
           type="number" 
@@ -63,6 +136,7 @@
           value="${spec.defaultVal}" 
           required
         >
+        <span class="form-helper">${escapeHtml(spec.desc)}</span>
       </div>
     `).join('');
   }
@@ -149,7 +223,7 @@
     }
 
     if (riskScoreLabel) {
-      riskScoreLabel.textContent = `${result.model} Signal`;
+      riskScoreLabel.textContent = `${result.model} Risk Signal`;
     }
 
     if (riskTierBadge && riskTierText) {

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Smart Healthcare System — AI-Driven Clinical Decision Support & Disease Risk Analysis">
-  <title>Smart Healthcare | 3D Clinical Intelligence & Disease Prediction</title>
+  <meta name="description" content="Smart Healthcare System — AI-Driven Clinical Decision Support & Disease Risk Analysis by Mohd Rehan">
+  <title>Smart Healthcare | AI Clinical Intelligence & Disease Prediction</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,24 +12,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <!-- CSS Stylesheets with Cache Busting -->
-  <link rel="stylesheet" href="/static/style.css?v=2026.2.1">
-  <link rel="stylesheet" href="/static/3d-healthcare.css?v=2026.2.1">
+  <link rel="stylesheet" href="/static/style.css?v=2026.2.2">
+  <link rel="stylesheet" href="/static/3d-healthcare.css?v=2026.2.2">
 </head>
 <body class="dark-theme">
 
   <!-- Top Command Center Navigation Bar -->
   <header class="command-bar">
     <div class="command-container">
-      <div class="brand">
+      <a href="#top" class="brand">
         <div class="brand-icon">
           <span class="pulse-dot"></span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         </div>
         <div class="brand-text">
           <span class="brand-title">Smart Healthcare</span>
-          <span class="brand-badge">Clinical AI 2026</span>
+          <span class="brand-badge">By Mohd Rehan</span>
         </div>
-      </div>
+      </a>
 
       <nav class="nav-links">
         <a href="#assessment" class="nav-link active">Risk Assessment</a>
@@ -38,13 +38,18 @@
         <a href="#explainability" class="nav-link">Explainability</a>
         <a href="#sensitivity" class="nav-link">What-If Simulator</a>
         <a href="#eda" class="nav-link">EDA Intelligence</a>
-        <a href="#history" class="nav-link">History</a>
+        <a href="#author" class="nav-link">Author Profile</a>
       </nav>
 
-      <div class="system-status-pill">
-        <span class="status-indicator live" id="live-indicator"></span>
-        <span class="status-label" id="system-status-text">System Live</span>
-        <span class="latency-badge" id="latency-tag">-- ms</span>
+      <div class="nav-actions">
+        <a href="https://github.com/codebyrehan/smart-healthcare-disease-prediction-system" target="_blank" rel="noopener noreferrer" class="github-btn" title="View Source on GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <div class="system-status-pill">
+          <span class="status-indicator live" id="live-indicator"></span>
+          <span class="status-label" id="system-status-text">System Live</span>
+        </div>
       </div>
     </div>
   </header>
@@ -55,16 +60,16 @@
     <section class="hero hero-3d" id="top">
       <div class="hero-content">
         <div class="hero-kicker">
-          <span class="kicker-tag">DECISION SUPPORT PLATFORM</span>
-          <span class="kicker-sub">PIMA Indians Diabetes Cohort · Reproducible ML</span>
+          <span class="kicker-tag">MOHD REHAN · CLINICAL AI RESEARCH</span>
+          <span class="kicker-sub">PIMA Indians Diabetes Cohort · Reproducible Machine Learning</span>
         </div>
         <h1 class="hero-title">
           Predict. Understand.<br>
           <span class="gradient-text">Prevent.</span>
         </h1>
         <p class="hero-subtitle">
-          An AI-powered clinical intelligence workspace for early diabetes risk estimation. 
-          Bridging validated biometric parameters with transparent, multi-model machine learning.
+          An interactive, high-precision clinical decision-support system for early diabetes risk analysis. 
+          Developed by <strong>Mohd Rehan</strong>, bridging verified diagnostic biometric measurements with explainable, multi-model AI.
         </p>
         <div class="hero-actions">
           <a href="#assessment" class="btn btn-primary btn-glow">
@@ -74,6 +79,9 @@
           <a href="#benchmark" class="btn btn-secondary">
             <span>Explore Models</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+          <a href="mailto:codebyrehan@gmail.com" class="btn btn-outline">
+            <span>Contact Author</span>
           </a>
         </div>
         
@@ -132,25 +140,25 @@
         <strong id="dashboard-dataset-status">768 validated records · 8 features</strong>
       </div>
       <div class="system-item">
-        <span class="lbl">Active Model</span>
+        <span class="lbl">Active Architecture</span>
         <strong id="dashboard-active-model" class="highlight-cyan">Random Forest (Ensemble)</strong>
       </div>
       <div class="system-item">
-        <span class="lbl">Database Engine</span>
-        <strong id="dashboard-db-status">PostgreSQL Persistent</strong>
+        <span class="lbl">Database Persistence</span>
+        <strong id="dashboard-db-status">PostgreSQL Engine</strong>
       </div>
       <div class="system-item">
-        <span class="lbl">Class Split</span>
-        <strong id="dashboard-class-split">500 Neg (65.1%) / 268 Pos (34.9%)</strong>
+        <span class="lbl">Lead Researcher</span>
+        <strong class="highlight-emerald">Mohd Rehan (1CSE26)</strong>
       </div>
     </section>
 
     <!-- SECTION 1: Clinical Risk Assessment Console -->
     <section class="section-container" id="assessment">
       <div class="section-header">
-        <div class="section-kicker">01 · PATIENT ASSESSMENT WORKSPACE</div>
+        <div class="section-kicker">01 · PATIENT RISK ASSESSMENT</div>
         <h2>Clinical Risk Prediction Console</h2>
-        <p>Input patient diagnostic measurements or select a clinical reference persona to evaluate risk with the authoritative backend models.</p>
+        <p>Enter patient diagnostic measurements or select a preset profile to evaluate diabetes risk with the authoritative backend models.</p>
       </div>
 
       <div class="assessment-grid">
@@ -167,16 +175,16 @@
 
           <!-- Preset Personas -->
           <div class="personas-strip">
-            <span class="persona-label">Clinical Presets:</span>
-            <button type="button" class="preset-btn" data-preset="low">Low Risk</button>
-            <button type="button" class="preset-btn" data-preset="borderline">Borderline</button>
+            <span class="persona-label">Quick Clinical Presets:</span>
+            <button type="button" class="preset-btn" data-preset="low">Low Risk (Healthy)</button>
+            <button type="button" class="preset-btn" data-preset="borderline">Borderline / Pre-Diabetic</button>
             <button type="button" class="preset-btn" data-preset="elevated">Elevated Risk</button>
-            <button type="button" class="preset-btn" data-preset="reset">Clear</button>
+            <button type="button" class="preset-btn" data-preset="reset">Reset Form</button>
           </div>
 
           <form id="prediction-form" novalidate>
             <div class="form-grid" id="fields">
-              <!-- Fields dynamically generated or loaded with strict validation -->
+              <!-- Fields dynamically populated with clear, professional labels and helper tooltips -->
             </div>
             
             <div class="form-actions">
@@ -204,7 +212,7 @@
               </svg>
               <div class="ring-center-content">
                 <span class="risk-score-value" id="risk-score-value">--%</span>
-                <span class="risk-score-sub" id="risk-score-label">Awaiting Input</span>
+                <span class="risk-score-sub" id="risk-score-label">Awaiting Assessment</span>
               </div>
             </div>
 
@@ -214,9 +222,9 @@
             </div>
 
             <div class="risk-factors-panel" id="risk-factors-panel">
-              <span class="panel-title">Diagnostic Key Drivers:</span>
+              <span class="panel-title">Clinical Risk Drivers:</span>
               <ul class="factors-list" id="factors-list">
-                <li class="muted">Enter patient measurements to view clinical risk factors.</li>
+                <li class="muted">Enter patient measurements to compute risk factors and probability.</li>
               </ul>
             </div>
 
@@ -449,6 +457,70 @@
       </div>
     </section>
 
+    <!-- SECTION 8: Author & Research Profile -->
+    <section class="section-container" id="author">
+      <div class="section-header">
+        <div class="section-kicker">08 · LEAD RESEARCHER & DEVELOPER</div>
+        <h2>Project Architect & Author Profile</h2>
+        <p>Developed and engineered by <strong>Mohd Rehan</strong> as a portfolio-grade machine learning healthcare application.</p>
+      </div>
+
+      <div class="card glass-card author-profile-card">
+        <div class="author-card-grid">
+          <div class="author-avatar-col">
+            <div class="author-avatar">
+              <span>MR</span>
+            </div>
+            <div class="author-status-tag">
+              <span class="status-indicator live"></span>
+              <span>Lead Developer</span>
+            </div>
+          </div>
+
+          <div class="author-details-col">
+            <div class="author-title-row">
+              <h3>MOHD REHAN</h3>
+              <span class="author-badge">Data Science & ML Engineer</span>
+            </div>
+            
+            <p class="author-bio">
+              Architected and implemented the complete end-to-end <strong>Smart Healthcare System for Disease Prediction</strong>, including data preprocessing, feature engineering, multi-model evaluation pipelines (Logistic Regression, Decision Tree, Random Forest), explainability frameworks, PostgreSQL persistence, 3D WebGL visualizations, and ReportLab PDF reporting.
+            </p>
+
+            <div class="author-meta-grid">
+              <div class="meta-box">
+                <span class="meta-lbl">Roll Number</span>
+                <strong class="meta-val">25SCS1003003208</strong>
+              </div>
+              <div class="meta-box">
+                <span class="meta-lbl">Section & Dept</span>
+                <strong class="meta-val">1CSE26 · Computer Science</strong>
+              </div>
+              <div class="meta-box">
+                <span class="meta-lbl">Institution</span>
+                <strong class="meta-val">IILM University Greater Noida</strong>
+              </div>
+              <div class="meta-box">
+                <span class="meta-lbl">Faculty Supervisor</span>
+                <strong class="meta-val">Ms. Ishu Chaudhary</strong>
+              </div>
+            </div>
+
+            <div class="author-links-row">
+              <a href="mailto:codebyrehan@gmail.com" class="btn btn-primary btn-sm">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>codebyrehan@gmail.com</span>
+              </a>
+              <a href="https://github.com/codebyrehan/smart-healthcare-disease-prediction-system" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                <span>GitHub Repository</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Responsible AI & Clinical Governance Notice -->
     <section class="card glass-card responsible-card">
       <div class="responsible-header">
@@ -473,11 +545,12 @@
       <div class="footer-container">
         <div class="footer-left">
           <strong>Smart Healthcare System</strong>
-          <span>AI Clinical Intelligence Platform · 2026 Portfolio Edition</span>
+          <span>AI Clinical Intelligence Platform · Designed & Built by <strong>Mohd Rehan</strong></span>
         </div>
         <div class="footer-right">
           <span>Author: <strong>MOHD REHAN</strong> (25SCS1003003208)</span>
-          <span>Institution: <strong>IILM University</strong></span>
+          <span>Institution: <strong>IILM University Greater Noida</strong></span>
+          <span>Contact: <a href="mailto:codebyrehan@gmail.com" style="color: var(--accent-cyan); text-decoration:none;">codebyrehan@gmail.com</a></span>
         </div>
       </div>
     </footer>
@@ -485,8 +558,8 @@
   </main>
 
   <!-- JavaScript Modules with Cache Busting -->
-  <script src="/static/3d-healthcare.js?v=2026.2.1"></script>
-  <script src="/static/app.js?v=2026.2.1"></script>
-  <script src="/static/dashboard.js?v=2026.2.1"></script>
+  <script src="/static/3d-healthcare.js?v=2026.2.2"></script>
+  <script src="/static/app.js?v=2026.2.2"></script>
+  <script src="/static/dashboard.js?v=2026.2.2"></script>
 </body>
 </html>
