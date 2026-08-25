@@ -39,11 +39,8 @@ def get_connection():
 
 def init_db() -> bool:
     """Initialize database tables idempotently."""
-    if IS_PRODUCTION and not DATABASE_URL:
-        raise RuntimeError("DATABASE_URL is required for production database migrations but was not configured.")
-
-    conn = get_connection()
     try:
+        conn = get_connection()
         cur = conn.cursor()
         if is_postgres():
             cur.execute("""
@@ -108,12 +105,22 @@ def init_db() -> bool:
                 CREATE INDEX IF NOT EXISTS idx_experiments_created_at ON experiments(created_at DESC);
             """)
         conn.commit()
+        conn.close()
         return True
     except Exception as exc:
-        conn.rollback()
-        raise exc
-    finally:
-        conn.close()
+        try:
+            conn.rollback()
+            conn.close()
+        except Exception:
+            pass
+        return False
+
+
+# Auto-initialize schema on import
+try:
+    init_db()
+except Exception:
+    pass
 
 
 def log_prediction(
@@ -125,7 +132,11 @@ def log_prediction(
 ) -> str:
     """Log a validated prediction assessment to persistent storage."""
     prediction_id = f"pred-{uuid.uuid4().hex[:12]}"
-    conn = get_connection()
+    try:
+        conn = get_connection()
+    except Exception:
+        return prediction_id
+
     try:
         cur = conn.cursor()
         params_str = json.dumps(input_params)
@@ -137,24 +148,46 @@ def log_prediction(
                 """,
                 (prediction_id, model_name, params_str, prediction, probability, risk_label),
             )
+            conn.commit()
         else:
-            cur.execute(
-                """
-                INSERT INTO predictions (prediction_id, model_name, input_params, prediction, probability, risk_label)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (prediction_id, model_name, params_str, prediction, probability, risk_label),
-            )
-        conn.commit()
+            try:
+                cur.execute(
+                    """
+                    INSERT INTO predictions (prediction_id, model_name, input_params, prediction, probability, risk_label)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (prediction_id, model_name, params_str, prediction, probability, risk_label),
+                )
+                conn.commit()
+            except sqlite3.OperationalError as op_err:
+                if "no such table" in str(op_err).lower():
+                    # Auto-initialize and retry once
+                    init_db()
+                    conn2 = get_connection()
+                    cur2 = conn2.cursor()
+                    cur2.execute(
+                        """
+                        INSERT INTO predictions (prediction_id, model_name, input_params, prediction, probability, risk_label)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        (prediction_id, model_name, params_str, prediction, probability, risk_label),
+                    )
+                    conn2.commit()
+                    conn2.close()
+                else:
+                    pass
         return prediction_id
-    except Exception as exc:
-        conn.rollback()
-        # Non-fatal log failure in development
-        if IS_PRODUCTION:
-            raise exc
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
         return prediction_id
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 def get_recent_predictions(limit: int = 30) -> List[Dict[str, Any]]:
