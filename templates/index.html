@@ -12,10 +12,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <!-- CSS Stylesheets with Cache Busting -->
-  <link rel="stylesheet" href="/static/style.css?v=2026.2.2">
-  <link rel="stylesheet" href="/static/3d-healthcare.css?v=2026.2.2">
+  <link rel="stylesheet" href="/static/style.css?v=2026.2.3">
+  <link rel="stylesheet" href="/static/3d-healthcare.css?v=2026.2.3">
 </head>
-<body class="dark-theme">
+<body>
 
   <!-- Top Command Center Navigation Bar -->
   <header class="command-bar">
@@ -43,8 +43,9 @@
 
       <div class="nav-actions">
         <!-- Theme Colour Picker -->
-        <div class="theme-picker-group" title="Change theme colour">
-          <button class="theme-dot theme-dot-indigo active" data-theme="" title="Quantum Indigo (Default)"></button>
+        <div class="theme-picker-group" title="Select UI Color Theme">
+          <button class="theme-dot theme-dot-light active" data-theme="" title="Crisp Light (Default)"></button>
+          <button class="theme-dot theme-dot-indigo" data-theme="indigo" title="Quantum Indigo (Dark)"></button>
           <button class="theme-dot theme-dot-cobalt" data-theme="cobalt" title="Midnight Cobalt"></button>
           <button class="theme-dot theme-dot-emerald" data-theme="emerald" title="Cyber Emerald"></button>
           <button class="theme-dot theme-dot-crimson" data-theme="crimson" title="Crimson Vitality"></button>
@@ -64,7 +65,7 @@
   <main class="shell">
     
     <!-- Hero Section with 3D Medical AI Core -->
-    <section class="hero hero-3d" id="top">
+    <section class="hero hero-3d reveal-card" id="top">
       <div class="hero-content">
         <div class="hero-kicker">
           <span class="kicker-tag">MOHD REHAN · CLINICAL AI RESEARCH</span>
@@ -79,7 +80,7 @@
           Developed by <strong>Mohd Rehan</strong>, bridging verified diagnostic biometric measurements with explainable, multi-model AI.
         </p>
         <div class="hero-actions">
-          <a href="#assessment" class="btn btn-primary btn-glow">
+          <a href="#assessment" class="btn btn-primary">
             <span>Start Risk Assessment</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
@@ -141,7 +142,7 @@
     </section>
 
     <!-- System & Data Health Strip -->
-    <section class="card glass-card system-bar">
+    <section class="card glass-card system-bar reveal-card">
       <div class="system-item">
         <span class="lbl">Dataset Integrity</span>
         <strong id="dashboard-dataset-status">768 validated records · 8 features</strong>
@@ -165,12 +166,12 @@
       <div class="section-header">
         <div class="section-kicker">01 · PATIENT RISK ASSESSMENT</div>
         <h2>Clinical Risk Prediction Console</h2>
-        <p>Enter patient diagnostic measurements or select a preset profile to evaluate diabetes risk with the authoritative backend models.</p>
+        <p>Enter patient diagnostic measurements or select a preset profile to evaluate diabetes risk with authoritative backend models.</p>
       </div>
 
       <div class="assessment-grid">
         <!-- Input Form Card -->
-        <div class="card glass-card form-card">
+        <div class="card glass-card form-card reveal-card">
           <div class="model-select-header">
             <span class="form-subheading">Select Predictive Model</span>
             <div class="model-pill-group" role="radiogroup" aria-label="Model Selection" id="model-selector-pills">
@@ -205,7 +206,7 @@
         </div>
 
         <!-- Result Signal Card with 3D Biometric Ring -->
-        <div class="card glass-card result-card" id="result-display-stage">
+        <div class="card glass-card result-card reveal-card" id="result-display-stage">
           <div class="result-card-header">
             <span class="form-subheading">Model Assessment Signal</span>
             <span class="badge" id="evaluated-model-tag">Random Forest</span>
@@ -255,11 +256,11 @@
         <p>Side-by-side performance evaluation of all 3 classification architectures on the 20% stratified holdout test split.</p>
       </div>
 
-      <div class="benchmark-cards-grid" id="benchmark-cards-container">
+      <div class="benchmark-cards-grid reveal-card" id="benchmark-cards-container">
         <!-- Rendered by JS from real backend metrics -->
       </div>
 
-      <div class="card glass-card table-card">
+      <div class="card glass-card table-card reveal-card">
         <div class="table-header">
           <h3>Authoritative Performance Matrix</h3>
           <div class="table-actions">
@@ -282,7 +283,7 @@
       </div>
 
       <!-- Evaluation Model Selector Sub-Bar -->
-      <div class="eval-control-bar card glass-card">
+      <div class="eval-control-bar card glass-card reveal-card">
         <div class="eval-control-label">
           <span>Active Evaluation Model:</span>
           <strong id="eval-active-model-name">Random Forest</strong>
@@ -295,13 +296,13 @@
       </div>
 
       <!-- Evaluation Metric Chips -->
-      <div class="eval-chips-grid" id="evaluation-chips-grid">
+      <div class="eval-chips-grid reveal-card" id="evaluation-chips-grid">
         <!-- Populated by JS -->
       </div>
 
       <!-- Advanced Charts Grid (ROC, PR, Calibration, Confusion Matrix) -->
       <div class="charts-grid-2x2">
-        <div class="card glass-card chart-card">
+        <div class="card glass-card chart-card reveal-card">
           <div class="chart-header">
             <h4>Receiver Operating Characteristic (ROC)</h4>
             <span class="chart-meta" id="roc-meta">AUC: --</span>
@@ -309,7 +310,7 @@
           <div class="chart-svg-container" id="roc-chart-container"></div>
         </div>
 
-        <div class="card glass-card chart-card">
+        <div class="card glass-card chart-card reveal-card">
           <div class="chart-header">
             <h4>Precision-Recall Curve (PR-AUC)</h4>
             <span class="chart-meta" id="pr-meta">PR-AUC: --</span>
@@ -317,7 +318,7 @@
           <div class="chart-svg-container" id="pr-chart-container"></div>
         </div>
 
-        <div class="card glass-card chart-card">
+        <div class="card glass-card chart-card reveal-card">
           <div class="chart-header">
             <h4>Reliability Calibration Curve</h4>
             <span class="chart-meta">Quantile Binned</span>
@@ -325,7 +326,7 @@
           <div class="chart-svg-container" id="calibration-chart-container"></div>
         </div>
 
-        <div class="card glass-card chart-card">
+        <div class="card glass-card chart-card reveal-card">
           <div class="chart-header">
             <h4>Confusion Matrix (Test Split)</h4>
             <span class="chart-meta">Threshold: 0.50</span>
@@ -335,7 +336,7 @@
       </div>
 
       <!-- Threshold Tradeoff Analysis -->
-      <div class="card glass-card table-card threshold-section">
+      <div class="card glass-card table-card threshold-section reveal-card">
         <div class="table-header">
           <div>
             <h3>Threshold Decision Matrix & F1 Optimization</h3>
@@ -359,7 +360,7 @@
 
       <div class="grid-2col">
         <!-- Feature Importance Card -->
-        <div class="card glass-card">
+        <div class="card glass-card reveal-card">
           <div class="card-title-bar">
             <h3>Global Feature Importance</h3>
             <span class="badge" id="importance-model-label">Random Forest</span>
@@ -371,7 +372,7 @@
         </div>
 
         <!-- Data Quality Card -->
-        <div class="card glass-card">
+        <div class="card glass-card reveal-card">
           <div class="card-title-bar">
             <h3>Dataset Quality & Integrity</h3>
             <span class="badge badge-teal">Verified Cohort</span>
@@ -392,7 +393,7 @@
         <p>Simulate how shifts in individual diagnostic parameters (e.g. Glucose or BMI) alter predicted risk in real time.</p>
       </div>
 
-      <div class="card glass-card simulator-card">
+      <div class="card glass-card simulator-card reveal-card">
         <div class="simulator-controls">
           <div class="control-group">
             <label for="sensitivity-feature-select">Simulated Parameter</label>
@@ -434,11 +435,11 @@
       </div>
 
       <div class="grid-2col">
-        <div class="card glass-card">
+        <div class="card glass-card reveal-card">
           <h3>Summary Statistics (All Features)</h3>
           <div class="table-responsive mini-table-wrap" id="eda-stats-wrap"></div>
         </div>
-        <div class="card glass-card">
+        <div class="card glass-card reveal-card">
           <h3>Outcome Correlation & Grouped Means</h3>
           <div class="table-responsive mini-table-wrap" id="eda-corr-wrap"></div>
         </div>
@@ -453,7 +454,7 @@
         <p>Real-time audit log of executed predictions and ML training experiments persisted to PostgreSQL.</p>
       </div>
 
-      <div class="card glass-card table-card">
+      <div class="card glass-card table-card reveal-card">
         <div class="table-header">
           <h3>Persistent Prediction Assessment Log</h3>
           <span class="badge" id="history-count-badge">0 logged runs</span>
@@ -472,7 +473,7 @@
         <p>Developed and engineered by <strong>Mohd Rehan</strong> as a portfolio-grade machine learning healthcare application.</p>
       </div>
 
-      <div class="card glass-card author-profile-card">
+      <div class="card glass-card author-profile-card reveal-card">
         <div class="author-card-grid">
           <div class="author-avatar-col">
             <div class="author-avatar">
@@ -529,7 +530,7 @@
     </section>
 
     <!-- Responsible AI & Clinical Governance Notice -->
-    <section class="card glass-card responsible-card">
+    <section class="card glass-card responsible-card reveal-card">
       <div class="responsible-header">
         <div class="warn-icon">⚠️</div>
         <div>
@@ -557,7 +558,7 @@
         <div class="footer-right">
           <span>Author: <strong>MOHD REHAN</strong> (25SCS1003003208)</span>
           <span>Institution: <strong>IILM University Greater Noida</strong></span>
-          <span>Contact: <a href="mailto:codebyrehan@gmail.com" style="color: var(--accent-cyan); text-decoration:none;">codebyrehan@gmail.com</a></span>
+          <span>Contact: <a href="mailto:codebyrehan@gmail.com" style="color: var(--accent-primary); text-decoration:none;">codebyrehan@gmail.com</a></span>
         </div>
       </div>
     </footer>
@@ -565,11 +566,11 @@
   </main>
 
   <!-- JavaScript Modules with Cache Busting -->
-  <script src="/static/3d-healthcare.js?v=2026.2.2"></script>
-  <script src="/static/app.js?v=2026.2.2"></script>
-  <script src="/static/dashboard.js?v=2026.2.2"></script>
+  <script src="/static/3d-healthcare.js?v=2026.2.3"></script>
+  <script src="/static/app.js?v=2026.2.3"></script>
+  <script src="/static/dashboard.js?v=2026.2.3"></script>
 
-  <!-- Inline Theme Switcher — runs immediately, no FOUC -->
+  <!-- Inline Theme Switcher & Scroll Reveal Observer -->
   <script>
     (function () {
       var STORAGE_KEY = 'shc_theme';
@@ -582,7 +583,7 @@
       // Wire up dots
       document.querySelectorAll('.theme-dot').forEach(function (dot) {
         dot.addEventListener('click', function () {
-          var theme = dot.getAttribute('data-theme');
+          var theme = dot.getAttribute('data-theme') || '';
           applyTheme(theme);
           localStorage.setItem(STORAGE_KEY, theme);
         });
@@ -596,7 +597,28 @@
         }
         // Update active dot
         document.querySelectorAll('.theme-dot').forEach(function (d) {
-          d.classList.toggle('active', (d.getAttribute('data-theme') || '') === (theme || ''));
+          var dt = d.getAttribute('data-theme') || '';
+          d.classList.toggle('active', dt === (theme || ''));
+        });
+      }
+
+      // Smooth scroll reveal observer for cards
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal-card').forEach(function (el) {
+          observer.observe(el);
+        });
+      } else {
+        document.querySelectorAll('.reveal-card').forEach(function (el) {
+          el.classList.add('is-visible');
         });
       }
     })();

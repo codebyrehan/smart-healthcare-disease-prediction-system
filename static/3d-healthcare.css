@@ -10,11 +10,22 @@
   position: relative;
   overflow: hidden;
   border-radius: 28px;
-  background: radial-gradient(circle at 80% 50%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
-              linear-gradient(135deg, rgba(10, 23, 39, 0.95), rgba(5, 13, 24, 0.98));
-  border: 1px solid rgba(94, 234, 212, 0.18);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  margin-bottom: 40px;
+  background: radial-gradient(circle at 80% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
+              radial-gradient(circle at 20% 20%, rgba(129, 140, 248, 0.08) 0%, transparent 50%),
+              linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 36px;
+  transition: all 0.35s ease;
+}
+
+body[data-theme="indigo"] .hero-3d,
+body[data-theme="cobalt"] .hero-3d,
+body[data-theme="emerald"] .hero-3d,
+body[data-theme="crimson"] .hero-3d {
+  background: radial-gradient(circle at 80% 50%, rgba(99, 102, 241, 0.16) 0%, transparent 55%),
+              linear-gradient(135deg, rgba(14, 22, 42, 0.95), rgba(6, 9, 20, 0.98));
+  border-color: var(--border-color);
 }
 
 .hero-content {
@@ -32,29 +43,29 @@
 }
 
 .kicker-tag {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.16em;
-  color: var(--accent-cyan);
+  color: var(--accent-primary);
   text-transform: uppercase;
 }
 
 .kicker-sub {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: var(--text-dim);
   font-weight: 600;
 }
 
 .hero-title {
-  font-size: clamp(2.6rem, 5.5vw, 4.4rem);
+  font-size: clamp(2.6rem, 5.2vw, 4.2rem);
   font-weight: 800;
-  line-height: 1.05;
+  line-height: 1.06;
   letter-spacing: -0.04em;
-  color: #fff;
+  color: var(--text-main);
 }
 
 .gradient-text {
-  background: linear-gradient(120deg, #06b6d4, #10b981, #38bdf8);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -81,7 +92,7 @@
   gap: 20px;
   margin-top: 14px;
   padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-color);
 }
 
 .metric-item {
@@ -103,10 +114,10 @@
 .metric-divider {
   width: 1px;
   height: 28px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-color);
 }
 
-/* 3D WebGL Canvas Host */
+/* 3D Canvas Host */
 .health-orb-container {
   position: relative;
   width: 100%;
@@ -132,7 +143,7 @@
   height: 100%;
   border-radius: 50%;
   pointer-events: auto;
-  filter: drop-shadow(0 0 35px rgba(6, 182, 212, 0.25));
+  filter: drop-shadow(0 4px 30px rgba(2, 132, 199, 0.2));
 }
 
 /* Floating Diagnostic Nodes */
@@ -149,20 +160,18 @@
   gap: 8px;
   padding: 8px 12px;
   border-radius: 12px;
-  background: rgba(10, 23, 39, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(94, 234, 212, 0.28);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
   pointer-events: auto;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   animation: floatNode 6s ease-in-out infinite alternate;
 }
 
 .floating-node:hover {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-lg);
   transform: scale(1.08) translateY(-4px);
 }
 
@@ -183,7 +192,7 @@
 
 .node-meta small {
   font-size: 0.68rem;
-  color: var(--accent-cyan);
+  color: var(--accent-primary);
   font-weight: 700;
   font-family: var(--font-mono);
 }
@@ -232,28 +241,29 @@
 }
 
 .chart-axis {
-  stroke: rgba(255, 255, 255, 0.12);
+  stroke: var(--border-color);
   stroke-width: 1;
 }
 
 .chart-grid-line {
-  stroke: rgba(255, 255, 255, 0.04);
+  stroke: var(--chart-grid);
   stroke-dasharray: 4 4;
 }
 
 .chart-diagonal {
-  stroke: rgba(255, 255, 255, 0.2);
+  stroke: var(--text-dim);
   stroke-dasharray: 4 4;
   stroke-width: 1.2;
+  opacity: 0.5;
 }
 
 .chart-curve-line {
   fill: none;
-  stroke: var(--accent-cyan);
+  stroke: var(--accent-primary);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.35));
+  filter: drop-shadow(0 2px 8px rgba(2, 132, 199, 0.3));
 }
 
 .chart-point-dot {
@@ -265,12 +275,12 @@
 
 .chart-point-dot:hover {
   r: 6;
-  fill: #fff;
+  fill: var(--accent-primary);
   cursor: pointer;
 }
 
 .chart-label-text {
-  fill: var(--text-dim);
+  fill: var(--chart-text);
   font-size: 10px;
   font-family: var(--font-sans);
 }
@@ -279,11 +289,11 @@
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 0.78rem;
-  background: rgba(16, 185, 129, 0.12);
+  background: rgba(5, 150, 105, 0.1);
   color: var(--accent-emerald);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(5, 150, 105, 0.3);
 }
 
 .optimal-threshold-badge strong {
-  color: #fff;
+  color: var(--text-main);
 }

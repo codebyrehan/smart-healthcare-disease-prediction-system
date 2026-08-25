@@ -1,6 +1,7 @@
 /**
  * Interactive 3D Medical AI Core & Neural Visualization Canvas
  * High-performance lightweight 3D canvas with orbital particle nodes & mouse parallax tilt.
+ * Fully responsive and optimized for both Light (Crisp White & Soft Blue/Teal) and Dark Themes.
  */
 
 (function () {
@@ -23,7 +24,7 @@
   // Sphere and Node parameters
   const center = { x: 250, y: 250 };
   const radius = 130;
-  const nodeCount = 42;
+  const nodeCount = 44;
   const nodes = [];
 
   // Generate 3D Fibonacci sphere distribution for uniform spherical coverage
@@ -43,7 +44,7 @@
       baseX: x * radius,
       baseY: y * radius,
       baseZ: z * radius,
-      size: Math.random() * 2.5 + 2,
+      size: Math.random() * 2.8 + 2.2,
       pulseSpeed: Math.random() * 0.04 + 0.02,
       pulsePhase: Math.random() * Math.PI * 2,
     });
@@ -55,7 +56,6 @@
   let targetRotX = 0.2;
   let targetRotY = 0.4;
   let pulseTime = 0;
-  let isHovered = false;
 
   // Mouse Parallax tracking
   if (heroSection) {
@@ -66,7 +66,6 @@
 
       targetRotY = nx * 1.4;
       targetRotX = -ny * 1.1;
-      isHovered = true;
 
       if (orbHost) {
         orbHost.style.transform = `rotateX(${ny * -15}deg) rotateY(${nx * 20}deg)`;
@@ -76,7 +75,6 @@
     heroSection.addEventListener('pointerleave', () => {
       targetRotX = 0.2;
       targetRotY = 0.4;
-      isHovered = false;
       if (orbHost) {
         orbHost.style.transform = 'rotateX(0deg) rotateY(0deg)';
       }
@@ -87,6 +85,9 @@
   function render() {
     ctx.clearRect(0, 0, size, size);
 
+    // Determine if current theme is dark
+    const isDark = document.body.getAttribute('data-theme') && document.body.getAttribute('data-theme') !== '';
+
     // Smooth rotation interpolation
     rotX += (targetRotX - rotX) * 0.05 + 0.002;
     rotY += (targetRotY - rotY) * 0.05 + 0.005;
@@ -94,9 +95,15 @@
 
     // Draw central glowing biometric core
     const coreGlow = ctx.createRadialGradient(center.x, center.y, 10, center.x, center.y, 140);
-    coreGlow.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
-    coreGlow.addColorStop(0.5, 'rgba(16, 185, 129, 0.12)');
-    coreGlow.addColorStop(1, 'rgba(6, 182, 212, 0)');
+    if (isDark) {
+      coreGlow.addColorStop(0, 'rgba(99, 102, 241, 0.28)');
+      coreGlow.addColorStop(0.5, 'rgba(6, 182, 212, 0.14)');
+      coreGlow.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    } else {
+      coreGlow.addColorStop(0, 'rgba(2, 132, 199, 0.18)');
+      coreGlow.addColorStop(0.5, 'rgba(6, 182, 212, 0.10)');
+      coreGlow.addColorStop(1, 'rgba(2, 132, 199, 0)');
+    }
     ctx.fillStyle = coreGlow;
     ctx.beginPath();
     ctx.arc(center.x, center.y, 140, 0, Math.PI * 2);
@@ -106,8 +113,15 @@
     const corePulseR = 55 + Math.sin(pulseTime * 1.5) * 8;
     ctx.beginPath();
     ctx.arc(center.x, center.y, corePulseR, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(94, 234, 212, 0.35)';
+    ctx.strokeStyle = isDark ? 'rgba(94, 234, 212, 0.35)' : 'rgba(2, 132, 199, 0.35)';
     ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Secondary orbital ring
+    ctx.beginPath();
+    ctx.ellipse(center.x, center.y, 145, 60, Math.PI / 6, 0, Math.PI * 2);
+    ctx.strokeStyle = isDark ? 'rgba(139, 92, 246, 0.22)' : 'rgba(14, 165, 233, 0.22)';
+    ctx.lineWidth = 1;
     ctx.stroke();
 
     // Transform and project 3D points
@@ -124,7 +138,7 @@
       let z2 = z1 * cosX + node.baseY * sinX;
 
       // Perspective projection
-      const fov = 400;
+      const fov = 420;
       const scale = fov / (fov + z2);
       const px = center.x + x1 * scale;
       const py = center.y + y1 * scale;
@@ -135,7 +149,7 @@
         y: py,
         z: z2,
         scale,
-        alpha: Math.max(0.15, Math.min(1, alpha)),
+        alpha: Math.max(0.2, Math.min(1, alpha)),
         size: node.size * scale,
       };
     });
@@ -149,12 +163,12 @@
         const dy = p1.y - p2.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < 70) {
-          const lineAlpha = (1 - dist / 70) * Math.min(p1.alpha, p2.alpha) * 0.35;
+        if (dist < 72) {
+          const lineAlpha = (1 - dist / 72) * Math.min(p1.alpha, p2.alpha) * 0.4;
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${lineAlpha})`;
+          ctx.strokeStyle = isDark ? `rgba(94, 234, 212, ${lineAlpha})` : `rgba(2, 132, 199, ${lineAlpha})`;
           ctx.lineWidth = 1;
           ctx.stroke();
         }
@@ -168,28 +182,34 @@
     for (const p of projected) {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(94, 234, 212, ${p.alpha})`;
-      ctx.shadowColor = 'rgba(6, 182, 212, 0.8)';
-      ctx.shadowBlur = p.alpha > 0.6 ? 8 : 0;
+      if (isDark) {
+        ctx.fillStyle = `rgba(94, 234, 212, ${p.alpha})`;
+        ctx.shadowColor = 'rgba(6, 182, 212, 0.8)';
+        ctx.shadowBlur = p.alpha > 0.6 ? 8 : 0;
+      } else {
+        ctx.fillStyle = `rgba(2, 132, 199, ${p.alpha * 0.85 + 0.15})`;
+        ctx.shadowColor = 'rgba(2, 132, 199, 0.4)';
+        ctx.shadowBlur = p.alpha > 0.6 ? 6 : 0;
+      }
       ctx.fill();
       ctx.shadowBlur = 0;
     }
 
     // Interactive orbiting satellite particle
-    const satAngle = pulseTime * 0.8;
-    const satX = center.x + Math.cos(satAngle) * 165;
-    const satY = center.y + Math.sin(satAngle) * 65;
+    const satAngle = pulseTime * 0.85;
+    const satX = center.x + Math.cos(satAngle) * 160;
+    const satY = center.y + Math.sin(satAngle) * 60;
     ctx.beginPath();
-    ctx.arc(satX, satY, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#10b981';
-    ctx.shadowColor = '#10b981';
-    ctx.shadowBlur = 12;
+    ctx.arc(satX, satY, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = isDark ? '#10b981' : '#0d9488';
+    ctx.shadowColor = isDark ? '#10b981' : '#0d9488';
+    ctx.shadowBlur = 10;
     ctx.fill();
     ctx.shadowBlur = 0;
 
     requestAnimationFrame(render);
   }
 
-  // Start rendering
+  // Start rendering loop
   render();
 })();
